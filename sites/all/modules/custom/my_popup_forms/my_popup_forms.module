@@ -1,0 +1,52 @@
+ <?php
+ 
+ /**
+ * @file
+ */
+
+ 
+ 
+/**
+ * Implements hook_menu().
+*/
+ 
+
+function my_popup_forms_menu()  {
+    $items = array();
+  
+     $items['node/%node/ajax/%ctools_js/add_team_member'] = array(
+        'title' => 'modal contents',
+        'page callback' => 'ajax_modal_my_popup_forms_page_callback',
+        'page arguments' => array(3),
+        'access callback' => TRUE, 
+        'file' => 'includes/pages.my_popup_forms.inc',
+         'modal' => TRUE, // This line is where the magic happens.
+    );
+         return $items;
+
+}
+  
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

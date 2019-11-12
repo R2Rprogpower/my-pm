@@ -1,0 +1,110 @@
+<p>The module provides one hook and two helper functions described
+below.</p>
+
+<h2>hook_phonefield_supports_tel</h2>
+
+<pre>
+hook_phonefield__supports_tel()
+</pre>
+
+<p>Report if browser supports the <code>tel:</code> schema.</p>
+
+<dl>
+  <dt>Return value:</dt><dd>bool, TRUE if device
+  supports <code>tel:</code> schema, otherwise FALSE.</dd>
+</dl>
+
+<p>For code that may be used for this hook, here are some links that
+may help you get started:</p>
+
+<ul>
+  <li><a href="https://www.drupal.org/project/mobile_detect"><strong>Mobile Detect</strong></a>:
+  Bridge module for the <em>Mobile_Detect.php</em> library.</li>
+  <li><a href="https://stackoverflow.com/q/26796503/1837734">StackOverflow:
+  Using <code>tel:</code> in both mobile &amp; non-mobile
+  browsers</a>.</li>
+  <li><a href="https://stackoverflow.com/q/16724862/1837734">StackOverflow:
+  Changing links based on mobile device</a>.</li>
+  <li><a href="https://stackoverflow.com/q/6263896/1837734">StackOverflow:
+  Dealing with tel: anchor</a>.</li>
+</ul>
+
+<h2>phonefield_normalize</h2>
+
+<p>There are too many number plans and phone number formatting
+conventions to enforce a “standard” format for phone numbers.  All the
+following example phone numbers are resonable and may be entered as
+valid phone number in the <em>Phone number</em> field:</p>
+
+<ul>
+<li>5415553010</li>
+<li>541 555 3010</li>
+<li>(541) 555-3010</li>
+<li>(541) / 555-3010</li>
+</ul>
+
+<p>In fact, there are <em>no</em> checking of the format, so users can
+enter anything they like.  This has the advantage of
+supporting <em>any</em> formatting convention.</p>
+  
+<p>However, this free format may break the <code>tel:</code> schema if
+we try to use these human friendly phone numbers in a phone link.
+This free format also makes ut hard to do phone number lookups.  For
+instance, when the user searches for a phone number, matching with the
+human friendly format will be hard unless the user enter the exact
+same formatting as the phone number is stored on the database.</p>
+
+<p>This helper function can be used to normalize the phone number, so
+that it is suitable for use with the <code>tel:</code> schema and
+that it can be used for lookup, while keeping the display phone number
+shown to humans exactly as entered.</p>
+
+<pre>
+phonefield_normalize($phoneno, $link = TRUE)
+</pre>
+
+<p>Normalizes a formatted phone number.</p>
+
+<dl>
+  <dt>Parameters:</dt>
+  <dd><code>$phoneno</code>: string, a phone number.<br />
+  <code>$link</code>: bool, if TRUE, format it suitable
+  <a href="https://developers.google.com/web/fundamentals/native-hardware/click-to-call/">suitable</a>
+  for a <code>tel:</code>-link by keeping digits and the characters
+  “+” and “-” (and stripping all others);<br />
+  if FALSE, <em>all</em> non-digits are stripped.  This format is
+  stored in a separate field in the database and used for for lookup
+  and matching.</dd>
+  <dt>Return value:</dt>
+  <dd>string, a normalized version of the phone number.</dd>
+</dl>
+
+<h2>phonefield_get_entity_id</h2>
+
+<pre>
+phonefield_get_entity_id($field, $value)
+</pre>
+
+<p>Look up the <code>entity_id</code> associated with <code>$value</code> in field <code>$field</code>.</p>
+
+<dl>
+  <dt>Parameters:</dt><dd><code>$field</code>: string, the field to look up.<br/><code>$value</code>: string, the value to look up.</dd>
+  <dt>Return value:</dt><dd>if lookup successful, an array with the <code>entity_id</code>, <code>bundle</code> and <code>…_linklabel</code> (or <code>FALSE</code> if no result).</dd>
+</dl>
+
+<p>For instance, if there is a <em>phone field</em>
+named <code>field_phone</code> in the <em>User</em> entity, to look up
+the username associated with a specific phonenumber, you can do the
+following:</p>
+
+<pre>
+$eid = phonefield_get_entity_id('field_phone', $phonenumber);
+if (isset($eid['entity_id'])) {
+  $uid = $eid['entity_id'];
+  $username = db_query('SELECT name FROM {users} WHERE uid = :uid',
+    array(':uid' => $uid))->fetchfield();
+}
+else {
+  // Username not found.
+}
+</pre>

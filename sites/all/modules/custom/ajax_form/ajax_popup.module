@@ -1,0 +1,238 @@
+<?php
+ 
+ 
+/**
+ * Implements hook_forms().
+*/
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+//function ajax_popup_init() {
+//  if (user_is_anonymous() && arg(0) != 'ajax-get-popup-form') {
+//    popup_forms_parent_js();
+//    drupal_add_js(drupal_get_path('module', 'ajax_popup') . '/ajax_popup.js');
+//  }
+//}
+//
+///**
+// * Implements hook_popup_forms_data().
+// */
+//function ajax_popup_forms_data() {
+//  return array(
+//    'ajax_popup_user_login' => array(
+//      'form id' => 'user_login',
+//      'access callback' => 'user_is_anonymous',
+//      'close_buttons' => array('op'),
+//    ),
+//  );
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//function ajax_popup_forms($form_id, $args)
+//{
+//  $forms = array();
+//  // First we check if the form ID is equal to our alias
+//  if($form_id == 'ajax_popup_form')
+//  {
+//    // The user_pass() function is in the file user.pages.inc, which
+//    // is not included by default. As such, we need to manually include
+//    // it so our callback will work:
+//    module_load_include('module', 'control_user', 'control_user');
+//
+//    // Nest we tell Drupal to use the user_pass form for this form ID
+//    $forms['ajax_popup_form'] = array
+//    (
+//      'callback' => 'user_add_to_project_form',
+//    );
+//  }
+//
+//  return $forms;
+//}
+//?
+//
+//function ajax_popup_form_popup_form_ajax_popup_form_popup_forms_alter(&$form, &$form_id)
+//{
+//  // First, we will create a unique ID that can be used as a wrapper for the form. We could hard-code an
+//  // ID, however I prefer to use something that will be unique every time the form is called, on the off chance
+//  // that we someday want to use the same form multiple times on a single page. The #build_id of each form
+//  // is unique, and as such, we can use it to generate a unique form wrapper:
+//  $unique_key = 'form-wrapper-' . $form['#build_id'];
+//
+//  // Now we can add a wrapper to our entire form, that will be used as our ajax wrappre:
+//  $form['#prefix'] = '<div id="' . $unique_key . '">';
+//  $form['#suffix'] = '</div>';
+//
+//  // And finally we will ajaxify our submit button:
+//  $form['actions']['submit']['#ajax'] = array
+//  (
+//    // We pass the ID of our form wrapper as the ajax wrapper
+//    'wrapper' => $unique_key,
+//    // We will get to this callback in the last step of the tutorial
+//    'callback' => 'ajax_popup_form_ajax_submit',
+//  );
+//}
+//
+//
+//
+//
+//
+//function ajax_popup_block_info()
+//{
+//  // First, we define our block
+//  $blocks['custom_ajax_popup'] = array
+//  (
+//    // This title will show up on the block admin page
+//    'info' => t('ajax_popup ajax_popup ajax_popup Reset Block'),
+//  );
+//
+//  return $blocks;
+//}
+//
+//function pass_popup_block_view($delta = '')
+//{
+//  // Next, we create the content of our block
+//  if($delta == 'custom_ajax_popup')
+//  {
+//    $block = array
+//    (
+//      // The subject will be the title of the block as shown to the user
+//      'subject' => t('Password Reset'),
+//      'content' => array
+//      (
+//        // We use an arbitrary key here. This will be explained in the comments
+//        // after the code
+//        'custom_ajax_popup_block' => array
+//        (
+//          // We use our aliased form ID to create a form, that become the contents
+//          // of the block.
+//          'form' => drupal_get_form('user_add_to_project_form'),
+//        ),
+//      ),
+//    );
+//
+//    return $block;
+//  }
+//}
+//
+//
+//function ajax_popup_form_ajax_submit($form, &$form_state)
+//{
+//  $commands = array();
+//
+//  // 1) Check if there were any errors in submitting the form. If there were not, we
+//  //    will hide the block, as the user does not need to see it anymore. This will be done using
+//  //    the custom command we defined in our JS file in step 6
+//
+//  // Get any messages. Make sure to pass FALSE as the second argument, as we want to be able
+//  // to render these messages later
+//  $messages = drupal_get_messages(NULL, FALSE);
+//  // We will execute our command if there are no error messages
+//  if(!count($messages) || !isset($messages['error']) || !count($messages['error']))
+//  {
+//    // There were no error messages, so we add the command to hide the block
+//    $commands[] = array
+//    (
+//      'command' => 'passThemeHidePassPopup',
+//    );
+//  }
+//
+//
+//  // 2) Re-render the form, and replace the original form with the new re-rendered form.
+//  //    In the event that there was a validation error, the re-rendered form will show the error fields,
+//  //    and if there were no validation errors and the form was submitted, a fresh form will be shown
+//  //    to the user. We also want to prepend any messages that were created, so the user can see
+//  //    any success/failure messages
+//
+//  // The core-provided ajax_command_replace() is used, and NULL is passed as the selector, meaning
+//  // that the selector we defined in our #ajax will be used. The replacement value is our rendered form.
+//  $commands[] = ajax_command_replace(NULL, theme('status_messages') . render($form));
+// 
+//  // 3) Return our ajax commands
+//  return array('#type' => 'ajax', '#commands' => $commands);
+//}
+
+
+
+
+//function ajax_popup_menu() {
+//  // Сторінка попапа.
+//  $items['admin/first-popup/%ctools_js'] = array(
+//      'title' => 'My first popup',
+//      'page arguments' => array(1),
+//      'access callback' => TRUE,
+//      'page callback' => 'my_popup_callback',
+//      'type' => MENU_CALLBACK,
+//  );
+//  // Сторінка, на якій виводитиметься лінк на попап.
+//  $items['admin/first-popup-1'] = array(
+//      'title' => 'My first popup',
+//      'access callback' => TRUE,
+//      'page callback' => 'my_popup_page',
+//      'type' => MENU_CALLBACK,
+//  );
+//  return $items;
+//}
+///**
+//* Callback for 'webform-client-form-23'.
+//*/
+//function my_popup_callback($js = NULL) {
+//      //  $webForm = drupal_get_form('user_add_to_project_form'); // Завантажуємо ноду з вебформою. (з id 23).
+//        $webForm = '<p>drupal_get_form</p>'; // Завантажуємо ноду з вебформою. (з id 23).
+//
+//   if (!$js) {
+//      // Якщо JavaScript вимкнено – то переходимо до вебформи.
+//      return  $webForm;
+//  }
+// 
+// 
+//ctools_include('ajax');
+//ctools_include('modal');
+// $webForm = drupal_render($webForm); // Формуємо HTML структуру вебформи.
+// 
+// 
+//$output = array();
+////Виводимо вебформу у попап.
+//$output[] = ctools_modal_command_display(t('My WebForm'), $webForm);
+//print ajax_render($output);
+//drupal_exit();
+//}
+//
+//
+//function my_popup_page() {
+//// Підключаємо функцію з налаштуваннями.
+// // Виводимо лінк.
+//return ctools_modal_text_button(t('Popup link'), 'first-popup/nojs', t('test popup'), 'ctools-modal-first-popup-style');
+//}
+
+
+
+
+

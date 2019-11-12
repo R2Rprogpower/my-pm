@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for show email module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function show_email_install() {
+  // This will make UID=1 hidden by default.
+  variable_set('show_email_settings_hide_uid_one', 1);
+}
+
+/**
+ * Implements hook_install().
+ */
+function show_email_uninstall() {
+  // Delete all vars in Show Email module.
+  $sql = 'SELECT name FROM {variable} WHERE name LIKE :name';
+  $result = db_query($sql, array(':name' => db_like('show_email_') . '%'));
+  foreach ($result as $var) {
+    variable_del($var->name);
+  }
+}

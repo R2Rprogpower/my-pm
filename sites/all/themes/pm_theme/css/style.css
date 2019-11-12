@@ -1,0 +1,68 @@
+body.front
+{
+margin: 0;
+}
+
+/*name slogan*/
+#name-and-slogan {
+float: none;
+padding: 20px 0;
+}
+#site-name a {
+font-size: 20px;
+text-decoration: none;
+}
+
+/*admin menu */
+
+#secondary-menu {
+position: absolute;
+right: 0;
+top: 5px;
+width: auto;
+}
+
+/* menu styling*/
+
+#main-menu-links a {
+font-size: 14px;
+padding: 10px;
+display: inline-block;
+text-decoration: none;
+}
+/*sidebar-styling*/
+
+.sidebar .section {
+padding: 0 15px 0 0;
+}
+
+.region.region-sidebar-first {
+padding: 20px 0;
+}
+.sidebar .block {
+background-color:
+#F6F6F2;
+border-color:
+#F9F9F9;
+padding: 20px;
+margin-bottom: 20px;
+}
+#edit-actions {
+display: block;
+margin-top: 5px;
+}
+#edit-submit {
+background:
+#DDD;
+border: none;
+padding: 5px 15px;
+font-size: 14px;
+border: 1px solid
+#CCC;
+border-radius: 15px;
+}
+
+/*footer region*/
+.region-footer span {
+color: #DDD;
+}

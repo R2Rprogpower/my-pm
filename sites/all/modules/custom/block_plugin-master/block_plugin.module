@@ -1,0 +1,12 @@
+<?php
+
+define('DELTA_PREFIX', 'block_plugin_');
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function block_plugin_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && !empty($plugin_type)) {
+    return 'plugins/' . $plugin_type;
+  }
+}

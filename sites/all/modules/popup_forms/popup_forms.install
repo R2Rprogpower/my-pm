@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ *
+ * (Un)Installation hooks.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function popup_forms_uninstall() {
+  db_delete('variable')->condition('name', 'popup_forms%', 'LIKE')->execute();
+  cache_clear_all('variables', 'cache');
+}

@@ -1,0 +1,97 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+ (function($) {
+     
+     
+     
+     
+Drupal.behaviors.control_user = {
+  attach: function (context, settings) {
+   // $('', context).once('remove-modals', function () {
+//          var el = document.getElementById("ajax-link");
+//          el.addEventListener("click", () => { $('#panels-ipe-paneid-12').hide(); }, false);
+          
+    //   $('#panels-ipe-paneid-12').hide();
+       
+      // });
+  
+
+   
+    }
+};
+  
+ 
+//   $.fn.ajax_detach = function() {
+//    $('#panels-ipe-paneid-12').hide();
+//  
+//  }
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ })(jQuery);
+  
+//  Drupal.behaviors.control_user = {
+//  attach: function (context, settings) {
+//      function hide_view () {
+//   
+//  $('#panels-ipe-paneid-12').hide();
+//}
+//hide_view ();
+//      var el = document.getElementById("ajax-link");
+//        el.addEventListener("click", () => { hide_view(); }, false);
+// 
+//      }
+//    };
+//
+//$(function () {
+//  Drupal.attachBehaviors(document, Drupal.settings);
+//});
+//  }(jQuery));
+  
+  
+  
+  
+      
+//      
+//  Drupal.behaviors.ajax_detach = {
+//  attach: function (context, settings) {
+//      
+//    $.ajax({
+//  url: Drupal.settings.basePath + '/views/ajax',
+//  type: 'post',
+//  data: {
+//    view_name: 'project_team',
+//    view_display_id: 'block', //your display id
+//    view_args: VIEW_ARGUMENT_HERE, // your views argument(s)
+//  },
+//  dataType: 'json',
+//  success: function (response) {
+//    if (response[1] !== undefined) {
+//      console.log(response[1].data); // do something with the view
+//    }
+//  }
+//});
+      
+      
+      
+      
+//   $('', context).once('remove-modals', function () {
+//
+//   // var views = settings.views.ajaxViews;
+//    
+//  $('panels-ipe-portlet-wrapper panels-ipe-portlet-marker', context).removeClass('panel-pane pane-custom pane-2');
+//  
+//    });
+   // }
+ // };
+//

@@ -1,0 +1,14 @@
+name = Phone Field
+description = Defines a field type for phone numbers holding a human viewable version as well as a normalized version.
+package = Fields
+core = 7.x
+dependencies[] = field
+dependencies[] = advanced_help_hint
+files[] = tests/phonefield.test
+files[] = tests/phonefield.create.test
+
+; Information added by Drupal.org packaging script on 2019-05-31
+version = "7.x-1.2"
+core = "7.x"
+project = "phonefield"
+datestamp = "1559298490"

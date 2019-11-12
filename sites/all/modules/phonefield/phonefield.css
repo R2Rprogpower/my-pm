@@ -1,0 +1,7 @@
+.phonefield-field-column {
+  float: left;
+  width: 48%;
+}
+.phonefield-field-column .form-text {
+  width: 95%;
+}

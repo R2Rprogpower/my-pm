@@ -1,0 +1,6 @@
+name = My PM control ajax extension
+description = ajax detach
+core = 7.x
+;scripts[] = ajax_detach.js
+;scripts[] = ../../../libraries/jquery-ui.js
+package = My PM

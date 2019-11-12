@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * @file
+ * CreateTest.
+ */
+
+/**
+ * Create phonefield.
+ */
+class PhonefieldCreateTest extends DrupalWebTestCase {
+
+  /**
+   * Get Info.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Phonefield create',
+      'description' => 'Tests field creation and basic use.',
+      'group' => 'Phonefield',
+    );
+  }
+
+  /**
+   * Setup.
+   */
+  public function setUp() {
+    parent::setUp('field', 'phonefield');
+  }
+
+  /**
+   * Create Field API.
+   *
+   * All we're doing here is creating a content type, and create
+   * simple phonefield field on that content type.
+   */
+    // @codingStandardsIgnoreStart
+  public function testPhonefieldCreateFieldAPI() {
+    // @codingStandardsIgnoreEnd
+
+    // Create and login user.
+    $this->web_user = $this->drupalCreateUser(array(
+      'create article content',
+      'administer content types',
+      'administer fields',
+    ));
+    $this->drupalLogin($this->web_user);
+    $this->drupalGet('admin/structure/types/manage/article/fields');
+    // Now add a Phonefield field to the Article content type.
+    $single_field_name_friendly = $this->randomName(20);
+    $single_field_name_machine = strtolower($this->randomName(10));
+    $randomphone = (string) mt_rand(111111111111, 999999999999);
+    $randomphone[3] = $randomphone[7] = '-';
+    $edit = array(
+      'fields[_add_new_field][label]' => $single_field_name_friendly,
+      'fields[_add_new_field][field_name]' => $single_field_name_machine,
+      'fields[_add_new_field][type]' => 'phonefield_field',
+      'fields[_add_new_field][widget_type]' => 'phonefield_field',
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertText(t('These settings apply to the @field field',
+      array('@field' => $single_field_name_friendly)));
+
+    // We'll go with the default settings for this run-through.
+    $this->drupalPost(NULL, array(), t('Save field settings'));
+
+    // We will go with the defaults.
+    $this->drupalPost(NULL, array(), t('Save settings'));
+
+    // Is field created?
+    $this->assertRaw(t('Saved %field configuration',
+      array('%field' => $single_field_name_friendly)),
+      'Field added');
+    node_types_rebuild();
+    menu_rebuild();
+
+    $permission = 'create article content';
+    $this->checkPermissions(array($permission), TRUE);
+
+    // Save all settings (required?)
+    $this->drupalPost(NULL, array(), t('Save'));
+    $this->assertText(t('Your settings have been saved.'));
+
+    // Create a node with this field and make sure the phonefield shows up.
+    // Create articke form:
+    $field_name = 'field_' . $single_field_name_machine;
+    $this->drupalGet('node/add/article');
+    $this->assertField($field_name . '[und][0][phonenumber]', 'Phonefield found');
+
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body[und][0][value]'] = $this->randomName(16);
+    $edit['body[und][0][value]'] = $this->randomName(16);
+    $edit[$field_name . '[und][0][phonenumber]'] = $randomphone;
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->assertText(t('Article @title has been created.',
+      array('@title' => $edit['title'])));
+
+    $url = $this->getUrl();
+
+    // Change to anonymous user.
+    $this->drupalLogout();
+    $this->drupalGet($url);
+
+    $this->assertRaw($randomphone, t('Field contains phonenumber %phone.', array('%phone' => $randomphone)));
+  }
+
+}

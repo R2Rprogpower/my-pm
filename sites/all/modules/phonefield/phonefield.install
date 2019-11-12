@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * Install file for the phonefield module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function phonefield_field_schema($field) {
+  return array(
+    'columns' => array(
+      'linklabel' => array(
+        'description' => 'Phone link label.',
+        'type' => 'varchar',
+        'length' => 63,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+      ),
+      'phonenumber' => array(
+        'description' => 'Phone number.',
+        'type' => 'varchar',
+        'length' => 63,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+      ),
+      'normalized' => array(
+        'description' => 'Normalized copy of Phone number.',
+        'type' => 'varchar',
+        'length' => 63,
+        'not null' => FALSE,
+        'sortable' => TRUE,
+      ),
+    ),
+  );
+}

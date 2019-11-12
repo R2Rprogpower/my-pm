@@ -1,0 +1,865 @@
+<?php
+/**
+ *@file
+ * Helps PM development.
+ *\
+ /**
+ * Implements hook_menu().
+ */
+
+ 
+function control_user_menu() {
+    $items = array();
+     
+
+//$items['admin/user_management_page'] = array ();
+    $items['node/%node/add_team_member'] = array( //this creates a URL that will call this form at "examples/form-example"
+        'title' => 'Add a team member', //page title
+        'description' => 'Form that is used to',
+        'page callback' => 'dashboard_add_new_task_form_function', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+        'page arguments' => array(1) , //put the name of the form here
+     //   'load arguments' => array(2),
+        'access callback' => TRUE,
+    );
+    $items['node/%node/delete_team_member'] = array( //this creates a URL that will call this form at "examples/form-example"
+        'title' => 'Delete a team member', //page title
+        'description' => 'Form that is used to',
+        'page callback' => 'drupal_get_form', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+        'page arguments' => array(
+            'user_delete_from_project_form'
+        ) , //put the name of the form here
+        'access callback' => TRUE
+    );
+    $items['node/%node/delete_task'] = array( //this creates a URL that will call this form at "examples/form-example"
+        'title' => 'Delete a ticket', //page title
+        'description' => 'Form that is used to',
+        'page callback' => 'drupal_get_form', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+        'page arguments' => array(
+            'delete_task_form'
+        ) ,  
+        'access callback' => TRUE
+    );
+    $items['node/%node/dashboard/add_new_task'] = array( //this creates a URL that will call this form at "examples/form-example"
+        'title' => 'Add a new ticket', //page title
+        'description' => 'Form that is used to',
+        'page callback' => 'drupal_get_form', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+        'page arguments' => array(
+            'dashboard_add_new_task_form'
+        )  ,  
+        'access callback' => TRUE
+    );
+    $items['user/%user/add_skill'] = array( //this creates a URL that will call this form at "examples/form-example"
+        'title' => 'Add a new skill', //page title
+        'description' => 'Form that is used to',
+        'page callback' => 'drupal_get_form', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+        'page arguments' => array(
+            'user_add_skill_form'
+        ) ,  
+        'access callback' => TRUE
+    );
+    return $items;
+}
+
+     
+
+function user_add_skill_form($form, &$form_state) {
+    $skill_names_array = get_vocabulary_terms(get_vocabulary_id('Skill_list'));
+    $skill_level_array = get_vocabulary_terms(get_vocabulary_id('Skill_level_list'));
+    $uid = arg(1);
+    $user = user_load($uid);
+    if (!empty($user->field_skill_set[LANGUAGE_NONE])) {
+        $skill_set_item_ids = $user->field_skill_set[LANGUAGE_NONE];
+        $user_skill_names = array();
+        foreach ($skill_set_item_ids as $val) {
+            $user_skill_names[] = get_user_skill_name($val);
+        }
+        foreach ($user_skill_names as $key => $value) {
+            $user_skill_name_id = $value;
+            foreach ($skill_names_array as $key => $value) {
+                $skill_id = $key;
+                if ($skill_id == $user_skill_name_id) {
+                    unset($skill_names_array[$key]);
+                }
+            }
+        }
+    }
+    global $user;
+    $current_user_id = arg(1);
+    $admin_user_id = 1;
+    if ($user->uid == arg(1) || $user->uid = $admin_user_id)  {
+        $form['skill_name'] = array(
+            '#type' => 'select',
+            '#title' => t('Skill Name') ,
+            '#required' => TRUE,
+            '#options' => $skill_names_array,
+            '#description' => t('Choose the skill or technology.')
+        );
+        $form['skill_level'] = array(
+            '#type' => 'select',
+            '#title' => t('Skill Level') ,
+            '#required' => TRUE,
+            '#options' => $skill_level_array,
+            '#description' => t('Choose the level of the skill.')
+        );
+        $form['submit_button'] = array(
+            '#type' => 'submit',
+            '#value' => t('add a skill to the user') ,
+        );
+        $form['#submit'][] = 'user_add_skill_form_submit';
+    }
+    else     {
+        $link = l(t('Your User Page') , 'user');
+        $message = t('User can add skills ONLY to his own account!');
+        $form['textfield1'] = array(
+            '#type' => 'textfield',
+            '#size' => 90,
+            '#value' => $message,
+            '#attributes' => array(
+                'readonly' => 'readonly'
+            ) ,
+        );
+        $form['link'] = array(
+            '#markup' => $link,
+        );
+    }
+    return $form;
+}
+function user_add_skill_form_validate($form, &$form_state) {
+}
+function user_add_skill_form_submit($form, &$form_state) {
+    $skill_name_tid = $form_state['values']['skill_name'];
+    $skill_level_tid = $form_state['values']['skill_level'];
+    $uid = arg(1);
+    $user = user_load($uid);
+    $paragraph = new ParagraphsItemEntity(array(
+        'field_name' => 'field_skill_set',
+        'bundle' => 'skill_set'
+    ));
+    $paragraph->is_new = TRUE;
+    $paragraph->setHostEntity('user', $user);
+    $paragraph->field_skill_name[LANGUAGE_NONE][0]['tid'] = $skill_name_tid;
+    $paragraph->field_skill_level[LANGUAGE_NONE][0]['tid'] = $skill_level_tid;
+    $paragraph->save();
+    $form_state['redirect'] = 'user/' . $uid;
+}
+
+
+function dashboard_add_new_task_form($form, &$form_state) {
+    $nid = arg(1);
+    // creating  $ticket_types_array  for  $form['type']
+    $ticket_types_array = get_vocabulary_terms(get_vocabulary_id('Ticket_type'));
+    // creating  $ticket_statuses_array  for  $form['status']
+    $projects_array = _get_all_projects();
+    // creating  $ticket_statuses_array  for  $form['status']
+    $ticket_statuses_array = get_vocabulary_terms(get_vocabulary_id('Ticket_status'));
+    // creating  $ticket_statuses_array  for  $form['status']
+    $days_amount_array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+    // creating  $default_project  for  $form['status']
+    // creating $team_members_array for   $form['reporter']  and $form['responsable']
+    $team_members_array = _get_users_for_ticket_form($nid);
+    $date = time();
+    $format = 'Y-m-d H:i';
+    global $user;
+    $current_user = user_load(30);
+    $current_roles = $current_user->roles;
+    $if_user_is_admin = get_access_admin_value($current_roles);
+    // drupal_set_message('<pre>' . print_r($if_user_is_admin, TRUE) . '</pre>');
+    if (!empty($current_user->field_project[LANGUAGE_NONE]) or $if_user_is_admin == 0) {
+       if (isset ($current_user->field_project[LANGUAGE_NONE]) ) {
+        $current_projects = $current_user->field_project[LANGUAGE_NONE];
+        $access_value = get_access_project_value($current_projects);
+       }
+       else {
+           $access_value = 1;
+       }
+        if ($access_value > 0) {
+            if (!empty($team_members_array)) {
+                $form['title'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Title') ,
+                    '#required' => TRUE,
+                    '#description' => t('Choose the title of the new ticket.')
+                );
+                $form['type'] = array(
+                    '#type' => 'select',
+                    '#title' => t('Type') ,
+                    '#required' => TRUE,
+                    '#options' => $ticket_types_array,
+                    '#description' => t('Choose the type of the new ticket.')
+                );
+                $form['description'] = array(
+                    '#type' => 'textarea',
+                    '#title' => t('Description') ,
+                    '#required' => TRUE,
+                    '#description' => t('Space for orders, details, clarifications, motivations.')
+                );
+                $form['status'] = array(
+                    '#type' => 'select',
+                    '#title' => t('Status') ,
+                    '#required' => TRUE,
+                    '#options' => $ticket_statuses_array,
+                    '#description' => t('Choose the status of the new which new ticket is related to.')
+                );
+                $form['estimate'] = array(
+                    '#type' => 'select',
+                    '#title' => t('Estimate') ,
+                    '#required' => TRUE,
+                    '#options' => $days_amount_array,
+                    '#description' => t('Choose the amount of days that are needed to complete the task.')
+                );
+                $form['start_date'] = array(
+                    '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+                    '#title' => t('Start date & time') ,
+                    '#default_value' => $date,
+                    '#date_format' => $format,
+                    '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+                    '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+                    '#date_year_range' => '0:+2', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
+                    '#description' => t('Choose the start date for the ticket.')
+                );
+                $form['end_date'] = array(
+                    '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+                    '#title' => t('End date & time') ,
+                    '#default_value' => $date,
+                    '#date_format' => $format,
+                    '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+                    '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+                    '#date_year_range' => '-3:+3', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
+                    '#description' => t('Choose the start date for the ticket.')
+                );
+                $form['reporter'] = array(
+                    '#type' => 'select',
+                    '#title' => t('Reporter') ,
+                    '#options' => $team_members_array,
+                    '#description' => t('Choose the team member who reported the issue.')
+                );
+                $form['responsible'] = array(
+                    '#type' => 'select',
+                    '#title' => t('Responsible') ,
+                    '#options' => $team_members_array,
+                    '#description' => t('Choose the team member who is gonna be responsable for the complition of the task.')
+                );
+                $form['submit_button'] = array(
+                    '#type' => 'submit',
+                    '#value' => t('add task to the project') ,
+                );
+                $form['#submit'][] = 'dashboard_add_new_task_form_submit';
+            }
+            else {
+                $link = l(t('add a team member') , 'node/' . arg(1) . '/add_team_member');
+                $message = t('There are no team members for this project. So task woun\'t get a reporter or responsible');
+                $form['textfield'] = array(
+                    '#type' => 'textfield',
+                    '#size' => 90,
+                    '#value' => $message,
+                    '#attributes' => array(
+                        'readonly' => 'readonly'
+                    ) ,
+                );
+                $form['link'] = array(
+                    '#markup' => $link,
+                );
+            };
+        }
+        else {
+            $link1 = l(t('add a team member') , 'node/' . arg(1) . '/add_team_member');
+            $message1 = t('You have to be a team member of the project to add tickets to the project');
+            $message2 = t('You can ask Project Manager of the project for adding you to the project');
+            $form['textfield1'] = array(
+                '#type' => 'textfield',
+                '#size' => 90,
+                '#value' => $message1,
+                '#attributes' => array(
+                    'readonly' => 'readonly'
+                ) ,
+            );
+            $form['textfield2'] = array(
+                '#type' => 'textfield',
+                '#size' => 90,
+                '#value' => $message2,
+                '#attributes' => array(
+                    'readonly' => 'readonly'
+                ) ,
+            );
+            $form['link'] = array(
+                '#markup' => $link1,
+            );
+        }
+    }
+    else  {
+        $link2 = l(t('Your User Page') , 'user');
+        $link3 = l(t('Project page') , 'node/' . $nid);
+        $message3 = t('In order to add tickets to the project,') . ' ';
+        $message4 = t('you have to be authorized as a team member of the project or as the Admin');
+        $form['textfield3'] = array(
+            '#type' => 'textfield',
+            '#size' => 90,
+            '#value' => $message3 . $message4,
+            '#attributes' => array(
+                'readonly' => 'readonly'
+            ) ,
+        );
+        $form['link2'] = array(
+            '#markup' => $link2,
+        );
+        $form['br'] = array(
+            '#markup' => t('<br><br>') ,
+        );
+        $form['link3'] = array(
+            '#markup' => $link3,
+        );
+    }
+    return $form;
+}
+function dashboard_add_new_task_form_validate($form, &$form_state) {
+}
+function dashboard_add_new_task_form_submit($form, &$form_state) {
+    global $user;
+    $nid = arg(1);
+    $ticket_title = $form_state['values']['title'];
+    $ticket_description = array(
+        'value' => $form_state['values']['description'],
+        'format' => '',
+        'safe_value' => $form_state['values']['description'],
+    );
+    $ticket_reporter = $form_state['values']['reporter'];
+    $ticket_responsible = $form_state['values']['responsible'];
+    $ticket_status_term_reference = $form_state['values']['status'];
+    $ticket_type_term_reference = $form_state['values']['type'];
+    $ticket_estimate = $form_state['values']['estimate'];
+    $ticket_start_date = array(
+        'value' => $form_state['values']['start_date'],
+        'timezone' => 'Europe/Helsinki',
+        'timezone_db' => 'Europe/Helsinki',
+        'date_type' => 'datetime',
+    );
+    $ticket_end_date = array(
+        'value' => $form_state['values']['end_date'],
+        'timezone' => 'Europe/Helsinki',
+        'timezone_db' => 'Europe/Helsinki',
+        'date_type' => 'datetime',
+    );
+    $node = new stdClass();
+    $node->title = $ticket_title;
+    $node->type = "ticket";
+    $node->language = LANGUAGE_NONE;
+    $node->uid = 1;
+    $node->status = 1;
+    $node->promote = 0;
+    $node->comment = 1;
+    $field_project_value = array(
+        'nid' => $nid
+    );
+    $node->field_project[$node->language][0] = $field_project_value;
+    $node->field_type[$node->language][0]['tid'] = $ticket_type_term_reference;
+    $node->field_status[$node->language][0]['tid'] = $ticket_status_term_reference;
+    $node->field_estimate[$node->language][0] = $ticket_estimate;
+    $node->field_start_date[$node->language][0] = $ticket_start_date;
+    $node->field_end_date[$node->language][0] = $ticket_end_date;
+    $node->field_description[$node->language][0] = $ticket_description;
+    $node->field_reporter[$node->language][0]['uid'] = $ticket_reporter;
+    $node->field_responsible[$node->language][0]['uid'] = $ticket_responsible;
+    $node = node_submit($node); // Prepare node for saving
+    node_save($node);
+    $form_state['redirect'] = 'node/' . $node->nid . '/dashboard';
+    
+}
+function delete_task_form() {
+    $nid = arg(1);
+    $this_task_title = _get_node_title($nid);
+    $message = t('If you are sure that ticket') . ' ' . t($this_task_title) . ' ' . t('has to be deleted, press the button');
+    $form['textfield'] = array(
+        '#type' => 'textfield',
+        '#size' => 90,
+        '#value' => $message,
+        '#attributes' => array(
+            'readonly' => 'readonly'
+        ) ,
+    );
+    $form['submit_button'] = array(
+        '#type' => 'submit',
+        '#title' =>  check_plain($message),
+        '#value' => t('Delete the task') ,
+    );
+    $form['#submit'][] = 'delete_task_form_submit';
+    return $form;
+}
+function delete_task_form_validate($form, &$form_state) {
+}
+function delete_task_form_submit($form, &$form_state) {
+    $nid = arg(1);
+    node_delete($nid);
+    $form_state['redirect'] = 'user';
+}
+// page arument of the delete team member form
+function user_delete_from_project_form($form, &$form_state) {
+    $nid = arg(1);
+    $user_ids = _get_users_team_members_ids($nid);
+    $users_form_names_array = array();
+    foreach ($user_ids as $key => $value) {
+        $users_form_names_array[$value] = _get_user_name($value);
+    }
+    $form['user'] = array(
+        '#type' => 'select',
+        '#title' => t('Users') ,
+        '#options' => $users_form_names_array,
+        '#description' => t('Choose the user that you want to be added to the team.')
+    );
+    // adding the button
+    $form['submit_button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete a team member') ,
+        '#description' => t('Choose the user that you want to be added to the team.')
+    );
+    $form['#submit'][] = 'user_delete_from_project_form_submit';
+    return $form;
+}
+function user_delete_from_project_form_validate($form, &$form_state) {
+}
+function user_delete_from_project_form_submit($form, &$form_state) {
+    $uid = $form_state['values']['user'];
+    $nid = arg(1);
+    $user = user_delete_from_project($nid, $uid);
+    $form_state['redirect'] = 'node/' . arg(1);
+}
+     
+     
+
+
+function user_add_to_project_form($node, &$form_state) {
+    $nid = arg(1);
+     
+    $node = node_load($nid);
+    $new_nid = $node->nid;
+    // gethering and selecting users for user select list
+    $all_users = _get_all_users();
+    $unneeded_users_ids = _get_users_team_members_ids($nid);
+    $all_users_ids = array();
+    $allowed_users = array();
+    // get users' ids to compare with  $unneeded_users_ids
+    foreach ($all_users as $user_id => $user_name) {
+        $all_users_ids[] = $user_id;
+    }
+    // derive allowed user ids
+    foreach ($unneeded_users_ids as $unneeded_user_id) {
+        unset($all_users[$unneeded_user_id]);
+    }
+    $users = $all_users;
+    // create hook_form element
+    $users_form_names_array = array();
+    $users_form_ids_array = array();
+    foreach ($users as $user_id => $user_name) {
+        $users_form_names_array[$user_id] = $user_name;
+    }
+    global $user;
+    $current_roles = $user->roles;
+    $access_value = get_access_pm_value($current_roles);
+    $form = array();
+    if ($access_value > 0) {
+        if (!empty($users_form_names_array)) {
+            // creating menu fields
+            $form['user'] = array(
+                '#type' => 'select',
+                '#title' => t('Users') ,
+                '#options' => $users_form_names_array,
+                '#description' => t('Choose the user that you want to be added to the team.'),
+                
+                );
+            
+            
+                 
+           
+            $form['nid'] = array(
+                '#type' => 'hidden',
+                '#title' => 'textfield',
+                '#value' => $node->nid,
+                '#prefix' => '<div id="ajax-form-user-add-to-project-form">',
+                '#suffix' => '</div>',
+
+                );
+            
+            // adding the button
+            $form['submit'] = array(
+                '#type' => 'submit',
+     
+                '#value' => t('Add a team member'),
+                '#prefix' => '<div id="add_to_team_custom">',
+                '#suffix' => '</div>',
+                '#ajax' => array(
+                  'callback' => 'ajax_form_user_add_to_project_form_submit',
+                  'event' => 'click',
+                    ),
+                   );
+     
+     
+            $form['submit']['#submit'][] = 'user_add_to_project_form_submit';
+            $form['#attributes'] = array('class' => 'add_to_team_custom');
+
+        }
+        else {
+            $project_title = _get_node_title($nid);
+            $link1 = l(t('Go back to the ' . $project_title . '  project page') , 'node/' . arg(1));
+            $message1 = t('There are NO available users for this project');
+            $form['textfield1'] = array(
+                '#type' => 'textfield',
+                '#size' => 34,
+                '#value' => $message1,
+                '#attributes' => array(
+                    'readonly' => 'readonly'
+                ) ,
+            );
+            $form['link1'] = array(
+                '#markup' => $link1,
+            );
+            $message2 = t('OR');
+            $form['textfield2'] = array(
+                '#type' => 'textfield',
+                '#size' => 3,
+                '#value' => $message2,
+                '#attributes' => array(
+                    'readonly' => 'readonly'
+                ) ,
+            );
+            $link2 = l(t('ADD a new user to PM') , '/user/register');
+            $form['link2'] = array(
+                '#markup' => $link2,
+            );
+        };
+    }
+    else {
+        $project_title = _get_node_title($nid);
+        $link3 = l(t('Go back to the ' . $project_title . '  project page') , 'node/' . arg(1));
+        $message3 = t('Only Project Managers and Admins can add users to projects');
+        $form['textfield3'] = array(
+            '#type' => 'textfield',
+            '#size' => 34,
+            '#value' => $message3,
+            '#attributes' => array(
+                'readonly' => 'readonly'
+            ) ,
+        );
+        $form['link3'] = array(
+            '#markup' => $link3,
+        );
+       
+    }
+     
+    return $form;
+}
+function user_add_to_project_form_validate($form, &$form_state) {
+}
+function user_add_to_project_form_submit($form, &$form_state) {
+     
+ $nid =  $form_state['values']['nid'];
+ $uid = $form_state['values']['user'];
+ $user = _user_add_to_project($nid, $uid);
+     
+}
+     
+     
+ function ajax_form_user_add_to_project_form_submit($form, &$form_state) {
+          ctools_include('ajax');
+          ctools_include('modal');
+          ctools_modal_add_js(); 
+
+          $nid =  $form_state['values']['nid'];
+          $my_view_name = 'project_team';
+          $my_display_name = 'block';
+          $view = views_get_view($my_view_name);
+          $commands = array();
+          $commands[] = ajax_command_invoke(NULL, "reload_view"  );
+          $commands[] = ctools_modal_command_dismiss();
+          return array(
+            '#type' => 'ajax',
+            '#commands' => $commands,
+          );
+
+}
+
+
+function get_project_team_new_row_info($user, $nid) {
+    // used with addRowToProject_temView at drupal-7\sites\all\modules\custom\my_popup_forms and
+    // $new_row_data = get_project_team_row_info($user, $nid);
+    //$form_state['new_row_data'] = $new_row_data;
+    $uid = $user->uid; 
+    $user_name = $user->name;
+    $user_roles = array();
+    
+    foreach ($user->roles as $rid => $role) {
+        switch ($rid) {
+     case 4:
+        $user_roles[] = $role;
+       // echo "QA";
+        break;
+     case 5:
+         $user_roles[] = $role;
+       // echo "Devel";
+        break;
+     case 6:
+          $user_roles[] = $role;
+      //  echo "PM";
+        break;
+        }
+    }
+    $user_email = $user->mail;
+    $user_skype = $user->field_skype[LANGUAGE_NONE][0]['value'];
+    $user_phone = $user->field_phone[LANGUAGE_NONE][0]['phonenumber'];
+     
+     
+   $new_row_data =array(
+       'uId' => $uid,
+       'userName' => $user_name,
+       'userRoles' => $user_roles,
+       'userEmail' => $user_email,
+       'userSkype' => $user_skype,
+       'userPhone' => $user_phone,
+       'projectNid' => $nid,
+   );
+           return $new_row_data;
+}
+
+
+function user_delete_from_project($nid, $uid) {
+    $user = user_load($uid);
+    $arr = $user->field_project[LANGUAGE_NONE];
+    $field_project_value = array(
+        'nid' => $nid
+    );
+    foreach ($arr as $key => $elem) {
+        if ($field_project_value == $elem) {
+            unset($arr[$key]);
+        }
+        $user->field_project[LANGUAGE_NONE] = $arr;
+        user_save($user);
+    }
+    return;
+}
+function _user_add_to_project($nid, $uid) {
+    $user = user_load($uid);
+    $field_project_value = array(
+        'nid' => $nid
+    );
+    $user->field_project[LANGUAGE_NONE][] = $field_project_value;
+    user_save($user);
+    return $user;
+}
+// Get the id of the user
+function _get_uid($user_name) {
+    $query = ('SELECT uid FROM {users} WHERE name = :name');
+    $args = array(
+        ':name' => $user_name,
+    );
+    $result = db_query($query, $args);
+    foreach ($result as $user) {
+        $uid = $user->uid;
+    }
+    return $uid;
+}
+// Get the name of the user
+function _get_user_name($user_id) {
+    $query = ('SELECT name FROM {users} WHERE uid = :id');
+    $args = array(
+        ':id' => $user_id,
+    );
+    $result = db_query($query, $args);
+    foreach ($result as $user) {
+        $user_name = $user->name;
+    }
+    return $user_name;
+}
+//GET Users of the current project
+function _get_users_team_members_ids($nid) {
+    $query = "SELECT entity_id FROM {field_data_field_project} WHERE bundle = :bundle AND field_project_nid = :nid";
+    $args = array(
+        ':bundle' => 'user',
+        ':nid' => $nid,
+    );
+    $result = db_query($query, $args);
+    $unneeded_users = array();
+    foreach ($result as $user) {
+        $unneeded_users[] = $user->entity_id;
+    }
+    return $unneeded_users;
+}
+function _get_all_users() {
+    $query = "SELECT uid, name FROM {users} WHERE uid AND uid <> 1 > 0";
+    $result = db_query($query);
+    $users = array();
+    foreach ($result as $user) {
+        $users[$user
+            ->uid] = $user->name;
+    }
+    return $users;
+}
+function _get_node_title($nid) {
+    $query = "SELECT title FROM {node} WHERE nid = :nid";
+    $args = array(
+        ':nid' => $nid,
+    );
+    $result = db_query($query, $args);
+    foreach ($result as $node) {
+        $node_title = $node->title;
+    }
+    return $node_title;
+}
+function _get_all_projects() {
+    $query = "SELECT nid, title FROM {node} WHERE type = :project";
+    $args = array(
+        ':project' => 'project',
+    );
+    $result = db_query($query, $args);
+    $users = array();
+    foreach ($result as $project) {
+        $projects[$project->nid] = $project->title;
+    }
+    return $projects;
+}
+function get_vocabulary_id($v_name) {
+    $query = "SELECT vid FROM {taxonomy_vocabulary} WHERE name = :name";
+    $args = array(
+        ':name' => $v_name,
+    );
+    $result = db_query($query, $args);
+    foreach ($result as $key => $value) {
+        $v_id = $value;
+    }
+    return $v_id->vid;
+}
+function get_vocabulary_terms($vid) {
+    $query = "SELECT * FROM {taxonomy_term_data} WHERE vid = :vid";
+    $args = array(
+        ':vid' => $vid,
+    );
+    $result = db_query($query, $args);
+    $v_terms = array();
+    foreach ($result as $value) {
+        $v_terms[$value->tid] = $value->name;
+    }
+    return $v_terms;
+}
+function _get_users_for_ticket_form($nid) {
+    $team_members_array_ids = _get_users_team_members_ids($nid);
+    $team_members_array = array();
+    if (!empty($team_members_array_ids)) {
+        foreach ($team_members_array_ids as $key => $value) {
+            $team_members_array[$value] = _get_user_name($value);
+        };
+    };
+    return $team_members_array;
+}
+function get_all_roles() {
+    // returns array ['rid'] => ['role_name']
+    $query = "SELECT * FROM {role}";
+    $result = db_query($query);
+    $roles = array();
+    foreach ($result as $role) {
+        $roles[$role->rid] = $role->name;
+    }
+    return $roles;
+}
+function get_role_by_rid($rid) {
+    $query = "SELECT rid, name FROM {role} where rid = :rid";
+    $args = array(
+        ':rid' => $rid
+    );
+    $result = db_query($query, $args);
+    $roles = array();
+    foreach ($result as $role) {
+        $roles[$role->rid] = $role->name;
+    }
+    return $roles;
+}
+function get_access_pm_value($current_roles) {
+    // checks if global $user->roles has admin or pm value
+    $admin_role = get_role_by_rid(3);
+    $pm_role = get_role_by_rid(6);
+    $access_value = 0;
+    foreach ($current_roles as $role) {
+        if ($role == array_values($admin_role) [0] or $role == array_values($pm_role) [0]) {
+            $access_value++;
+        };
+    };
+    return $access_value;
+}
+function get_access_admin_value($current_roles) {
+    // checks if global $user->roles has admin or pm value
+    $admin_role = get_role_by_rid(3);
+    $access_value = 0;
+    foreach ($current_roles as $role) {
+        if ($role == array_values($admin_role)[0]) {
+            $access_value = 1;
+        };
+    }
+    return $access_value;
+}
+function get_access_project_value($current_projects) {
+    $nid = arg(1);
+    $access_value = 0;
+    global $user;
+    $current_user = user_load($user->uid);
+    if (!empty($current_user->field_project[LANGUAGE_NONE])) {
+        $current_projects = $current_user->field_project[LANGUAGE_NONE];
+    }
+    $current_roles = $user->roles;
+    $inner_access_value = 0;
+    $inner_access_value = get_access_pm_value($current_roles);
+    if ($inner_access_value > 0) {
+        $access_value = 1;
+    }
+    else {
+        foreach ($current_projects as $project) {
+            if ($project['nid'] == $nid) {
+                $access_value++;
+            };
+        }
+    }
+    return $access_value;
+}
+function get_project_tickets($nid) {
+    $nid = array(
+        'nid' => $nid
+    );
+    $query = "SELECT title, nid FROM {node} WHERE type = 'ticket'";
+    $result = db_query($query);
+    $tickets = array();
+    foreach ($result as $ticket) {
+        $tickets[$ticket->nid] = $ticket->title;
+    }
+    $ticket_ids = array_keys($tickets);
+    foreach ($ticket_ids as $ticket) {
+        $current_ticket = node_load($ticket);
+        if ($current_ticket->field_project[LANGUAGE_NONE][0]['nid'] == $nid['nid']) {
+            $project_tickets[$current_ticket
+                ->nid] = $current_ticket->title;
+        }
+    }
+    return $project_tickets;
+}
+function get_user_skill_name($skill_set_item_ids) {
+    $e_id = $skill_set_item_ids['value'];
+    $r_id = $skill_set_item_ids['revision_id'];
+    $query = "SELECT field_skill_name_tid FROM {field_data_field_skill_name} WHERE entity_id = :e_id AND revision_id = :r_id";
+    $args = array(
+        ':e_id' => $e_id,
+        ':r_id' => $r_id,
+    );
+    $result = db_query($query, $args);
+    foreach ($result as $field_name => $value) {
+        $skill_name_tid = $value;
+    }
+    return $skill_name_tid->field_skill_name_tid;
+}
+function get_user_skill_level($skill_set_item_ids) {
+    $e_id = $skill_set_item_ids['value'];
+    $r_id = $skill_set_item_ids['revision_id'];
+    $query = "SELECT field_skill_level_tid FROM {field_data_field_skill_level} WHERE entity_id = :e_id AND revision_id = :r_id";
+    $args = array(
+        ':e_id' => $e_id,
+        ':r_id' => $r_id,
+    );
+    $result = db_query($query, $args);
+    foreach ($result as $field_name => $value) {
+        $skill_level_tid = $value;
+    }
+    return $skill_level_tid->field_skill_level_tid;
+}

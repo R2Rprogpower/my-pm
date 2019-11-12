@@ -1,0 +1,92 @@
+<h2>Introduction</h2>
+
+<p>This module provides a HTML5 phone field that supports
+the <code>tel:</code> schema that is available on most
+recent smart-phones.</p>
+
+<p>The HTML5 <code>tel:</code> schema is defined in 2004, in 
+<a href="http://www.ietf.org/rfc/rfc3966.txt">RFC3966: The tel
+URI for Telephone Numbers</a>. For an update, see
+<a href="https://css-tricks.com/the-current-state-of-telephone-links/">Geoff
+Graham: The Current State of Telephone Links </a>.</p>
+  
+<h2>Using the module</h2>
+
+<p>After the module has been enabled, a <em>Phone number</em> field
+  becomes available and may be added to an entity bundle.  When you
+do, a form for setting up the field (like the one shown below) appears.</p>
+
+<div class="help-imgpos-center" style="max-width:540px">
+<img class="help-img" alt="phonefield.png" title="Screendump" src="&path&phonefield.png" width="540" />
+<div class="help-img-caption" style="max-width:540px">Form for setting up the phone field</div>
+</div>
+
+<p>A phone link label (e.g. “Call us”) for can be set to static,
+optional, or no label.  If the label is optional, there will be a
+translatable field for the label along with phone number field on each
+entity instance.  If the label is static, the phone link will always
+use the same label.  The static or default label is entered on the
+form for editing the phone field settings for a particular entity.  A
+static or default label cannot be translated.</p>
+
+<p>The module provides four format options that can be selected in the
+column “Format” under the “Manage display” tab.</p>
+<ol>
+  <li>Phone link (default): A phone link with the label used as anchor text.</li>
+  <li>Label: phone link: The label is followed by a phone link with the phone number as anchor text.</li>
+  <li>Label: phone number: The label is followed by the phone number (no link).</li>
+  <li>Phone number: Only the phone number (no label, no link).</li>
+</ol>
+
+<p>If <code>hook_phonefield__supports_tel()</code> is implemented, and
+it returns FALSE, a link will <em>not</em> be created, even if a
+format option to create a link is choosen.</p>
+
+<p>If the label is optional, and there is no default link label, the
+phone number will be used as anchor text. When the number is used as
+anchor text, the formatted version is shown, while the normalized
+version of the number is used for phone links.</p>
+
+<p>If you add a phone number field to the user entity, you may want to
+prevent it from being dislayed as part of the user's public user
+profile, by setting its display property to “Hidden”.</p>
+
+
+
+<h2>Limitations</h2>
+
+<p>The phone field created by this module is a free format text field.
+There is no provision for custom formatters or country codes.  The
+module is intentionally lightweight on features. There is no
+validation of the number entered.</p>
+
+<p>While this may be perceived as a limitation by some, this also
+means that you can enter a number that is human viewable confirming to
+any local convention for displaying phone numbers, including hyphens
+and brackets.</p>
+
+<h2>Troubleshooting</h2>
+
+<ul>
+  <li><strong>The <code>tel:</code>-link does not work.</strong><br/>
+  Clicking on the <code>tel:</code>-produces no result, or produces an
+  error message from the browser (e.g. “The address wasn’t understood”
+  or “The webpage cannot be displayed”).<br/>  This is the standard
+  behaviour if your device does not have a phone app.  The URL only
+  works as expected on smartphones and similar devices.  To fall back
+  on an alternative display for non-phone devices, you may create a
+  custom module that
+  implements <code>hook_phonefield__supports_tel()</code>.  See the
+  next help page for a description of this hook.</li>
+</ul>
+
+
+<h2>FAQ</h2>
+
+
+<ol>
+  </li>
+</ol>
+
+<p>No questions yet.</p>
+

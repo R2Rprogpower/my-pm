@@ -1,0 +1,99 @@
+ <?php
+//
+//
+//function control_user_schema() {
+// 
+//  $schema = array();
+//  $schema['control_user'] = array(
+//    // Example (partial) specification for table "node".
+//    'description' => 'The base table for control_user.',
+//    'fields' => array(
+//      'cu_id' => array(
+//        'description' => 'The primary identifier for a control_user.',
+//        'type' => 'serial',
+//        'unsigned' => TRUE,
+//        'not null' => TRUE,
+//      ),
+//      'users' => array(
+//        'description' => 'A field for storing picked user ',
+//        'type' => 'select',
+//        'options' => $users_form_array,
+//        'unsigned' => TRUE,
+//        'not null' => TRUE,
+//        'default' => '',
+//      ),
+//       'projects' => array(
+//        'description' => 'A field for storing picked project ',
+//        'type' => 'select',
+//        'options' => $users_form_array,
+//         'unsigned' => TRUE,
+//        'not null' => TRUE,
+//        'default' => '',
+//      ),
+//       
+//    ),
+//    'indexes' => array(
+//      'node_changed' => array(
+//        'changed',
+//      ),
+//      'node_created' => array(
+//        'created',
+//      ),
+//    ),
+//    'unique keys' => array(
+//      'nid_vid' => array(
+//        'nid',
+//        'vid',
+//      ),
+//      'vid' => array(
+//        'vid',
+//      ),
+//    ),
+//    // For documentation purposes only; foreign keys are not created in the
+//    // database.
+//    'foreign keys' => array(
+//      'node_revision' => array(
+//        'table' => 'node_revision',
+//        'columns' => array(
+//          'vid' => 'vid',
+//        ),
+//      ),
+//      'node_author' => array(
+//        'table' => 'users',
+//        'columns' => array(
+//          'uid' => 'uid',
+//        ),
+//      ),
+//    ),
+//    'primary key' => array(
+//      'nid',
+//    ),
+//  );
+//  return $schema;
+//}
+ 
+
+
+
+/**
+ *@file
+ * Helps PM development.
+ *\
+ /**
+ * Implements hook_menu().
+ */
+//function control_user_menu() {
+//  $items['project/%/uesr/%/add'] = array(
+//    'page callback' => 'control_user_add',
+//    'page arguments' => array(1,3),
+//   );
+//  
+//}
+// 
+//function control_user_add() {
+//    
+//    
+//    
+//}
+//
+

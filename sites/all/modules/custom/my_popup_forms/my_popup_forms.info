@@ -1,0 +1,4 @@
+name = my_popup_forms
+description = CTOOLS MODAL EXAMPLE
+core = 7.x
+package = development

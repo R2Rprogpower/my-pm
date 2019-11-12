@@ -1,0 +1,579 @@
+<?php
+
+/**
+ * @file
+ * Hooks for a module that defines a simple phone number field type.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function phonefield_help($path, $arg) {
+  if ($path == 'admin/help#phonefield') {
+    $output = '<p>' . t('This module defines a field type for phone numbers.') . '</p>'
+      . '<p>' . advanced_help_hint_docs('phonefield', 'https://www.drupal.org/docs/7/modules/phone-field', TRUE) . '</p>';
+    return $output;
+  }
+}
+
+/**
+ * Implements hook_admin_paths_alter().
+ *
+ * Force help pages for this module to be rendered in admin theme.
+ */
+function phonefield_admin_paths_alter(&$paths) {
+  $paths['help/phonefield/*'] = TRUE;
+}
+
+/**
+ * Implements hook_field_presave().
+ */
+function phonefield_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  foreach ($items as $key => $item) {
+    if (isset($item['linklabel'])) {
+      $linklabel = trim($item['linklabel']);
+      $items[$key]['linklabel'] = empty($linklabel) ? NULL : $linklabel;
+    }
+    else {
+      $items[$key]['linklabel'] = NULL;
+    }
+    $items[$key]['phonenumber'] = trim($item['phonenumber']);
+    $items[$key]['normalized'] = phonefield_normalize($item['phonenumber'], FALSE);
+  }
+}
+
+/**
+ * Implements hook_field_info().
+ */
+function phonefield_field_info() {
+  return array(
+    'phonefield_field' => array(
+      'label' => t('Phonefield'),
+      'description' => t('Store a phone link label and a phone number in the database.'),
+      'settings' => array(
+        'linkstate' => 'static',
+        'linkvalue' => '',
+      ),
+      'instance_settings' => array(
+        'linkstate' => 'static',
+        'linkvalue' => '',
+      ),
+      'default_widget' => 'phonefield_field',
+      'default_formatter' => 'phonefield_default',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_instance_settings_form().
+ */
+function phonefield_field_instance_settings_form($field, $instance) {
+  $form = array(
+    '#element_validate' => array('phonefield_field_settings_form_validate'),
+  );
+
+  $title_options = array(
+    'static' => t('Static label'),
+    'optional' => t('Optional label'),
+    'none' => t('No label'),
+  );
+
+  $form['linkstate'] = array(
+    '#type' => 'radios',
+    '#title' => t('Phone link label'),
+    '#default_value' => isset($instance['settings']['linkstate']) ? $instance['settings']['linkstate'] : 'static',
+    '#options' => $title_options,
+    '#description' => t('If the phone link label is optional, there will be a translatable field for the label. If the label is static, the phone link will always use the same label.'),
+  );
+  $form['linkvalue'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Static or default phone link label'),
+    '#default_value' => !empty($instance['settings']['linkvalue']) ? $instance['settings']['linkvalue'] : t('Phone'),
+    '#description' => t('This label will be used if “Static label” is selected above, or if “Optional label” is selected above <em>and</em> no link label is entered when creating content.'),
+    '#states' => array(
+      'visible' => array(
+        array(
+          ':input[name="instance[settings][linkstate]"]' => array('value' => 'optional'),
+        ),
+        array(
+          ':input[name="instance[settings][linkstate]"]' => array('value' => 'static'),
+        ),
+      ),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Form validate.
+ *
+ * #element_validate handler for phonefield_field_instance_settings_form().
+ */
+function phonefield_field_settings_form_validate($element, &$form_state, $complete_form) {
+  if ($form_state['values']['instance']['settings']['linkstate'] === 'static' && empty($form_state['values']['instance']['settings']['linkvalue'])) {
+    form_set_error('instance][settings][linkvalue', t('A link label must be provided if the link label is a static value.'));
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function phonefield_field_is_empty($item, $field) {
+  return empty($item['linklabel']) && empty($item['phonenumber']);
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function phonefield_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  if (empty($entity)) {
+    // Do not validate field config.
+    return;
+  }
+  $nophone = TRUE;
+  foreach ($items as $item) {
+    $phonenumber = trim($item['phonenumber']);
+    if (!empty($phonenumber)) {
+      $nophone = FALSE;
+      break;
+    }
+  }
+  if ($instance['required'] && $nophone) {
+    $errors[$field['field_name']][$langcode][0][] = array(
+      'error' => 'phonefield_required',
+      'message' => t('A phone number is required.'),
+      'error_element' => array('linklabel' => FALSE, 'phonenumber' => TRUE),
+    );
+  }
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function phonefield_field_widget_info() {
+  return array(
+    'phonefield_field' => array(
+      'label' => 'Phonefield',
+      'field types' => array('phonefield_field'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function phonefield_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element += array(
+    '#type' => $instance['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#attached' => array(
+      'css' => array(drupal_get_path('module', 'phonefield') . '/phonefield.css'),
+    ),
+  );
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function phonefield_field_widget_error($element, $error, $form, &$form_state) {
+  if (!empty($error['error_element']['linklabel'])) {
+    form_error($element['linklabel'], $error['message']);
+  }
+  elseif (!empty($error['error_element']['phonenumber'])) {
+    form_error($element['phonenumber'], $error['message']);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * Formatters:
+ *  'phonefield_default'
+ *  'phonefield_separate_link'
+ *  'phonefield_separate_plain'
+ *  'phonefield_plain'
+ */
+function phonefield_theme() {
+  return array(
+    'phonefield_formatter_phonefield_default' => array(
+      'variables' => array('element' => NULL, 'field' => NULL),
+    ),
+    'phonefield_formatter_phonefield_separate_link' => array(
+      'variables' => array('element' => NULL, 'field' => NULL),
+    ),
+    'phonefield_formatter_phonefield_separate_plain' => array(
+      'variables' => array('element' => NULL, 'field' => NULL),
+    ),
+    'phonefield_formatter_phonefield_plain' => array(
+      'variables' => array('element' => NULL),
+    ),
+    'phonefield_field' => array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+/**
+ * Formats a phonefield field widget.
+ */
+function theme_phonefield_field($vars) {
+  $element = $vars['element'];
+  // Prefix single value phonefield fields with the name of the field.
+  if (empty($element['#field']['multiple'])) {
+    if (isset($element['phonenumber']) && !isset($element['linklabel'])) {
+      $element['phonenumber']['#title_display'] = 'invisible';
+    }
+  }
+
+  $output = '';
+  $output .= '<div class="phonefield-field-subrow clearfix">';
+  if (isset($element['linklabel'])) {
+    $output .= '<div class="phonefield-field-title phonefield-field-column">' . drupal_render($element['linklabel']) . '</div>';
+  }
+  $output .= '<div class="phonefield-field-phonenumber' . (isset($element['linklabel']) ? ' phonefield-field-column' : '') . '">' . drupal_render($element['phonenumber']) . '</div>';
+  $output .= '</div>';
+  $output .= drupal_render_children($element);
+  return $output;
+}
+
+/**
+ * Implements hook_element_info().
+ */
+function phonefield_element_info() {
+  $elements = array();
+  $elements['phonefield_field'] = array(
+    '#input' => TRUE,
+    '#process' => array('phonefield_field_process'),
+    '#theme' => 'phonefield_field',
+    '#theme_wrappers' => array('form_element'),
+  );
+  return $elements;
+}
+
+/**
+ * Processes the phonefield type element before displaying the field.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in
+ * $complete_form['#field_info'][$element['#field_name']].
+ */
+function phonefield_field_process($element, $form_state, $complete_form) {
+  $instance = field_widget_instance($element, $form_state);
+  $settings = $instance['settings'];
+  $element['phonenumber'] = array(
+    '#type' => 'textfield',
+    '#maxlength' => 63,
+    '#title' => t('Phone number'),
+    '#description' => t('A free-format phone number.'),
+    '#required' => FALSE,
+    '#default_value' => isset($element['#value']['phonenumber']) ? $element['#value']['phonenumber'] : NULL,
+  );
+  if (in_array($settings['linkstate'], array('optional'))) {
+    $element['linklabel'] = array(
+      '#type' => 'textfield',
+      '#maxlength' => 63,
+      '#title' => t('Text'),
+      '#description' => t('Anchor text or link label.'),
+      '#required' => FALSE,
+      '#default_value' => isset($element['#value']['linklabel']) ? $element['#value']['linklabel'] : NULL,
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function phonefield_field_formatter_info() {
+  return array(
+    'phonefield_default' => array(
+      'label' => t('Phone link (default)'),
+      'field types' => array('phonefield_field'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+    'phonefield_separate_link' => array(
+      'label' => t('Label: phone link'),
+      'field types' => array('phonefield_field'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+    'phonefield_separate_plain' => array(
+      'label' => t('Label: phone number'),
+      'field types' => array('phonefield_field'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+    'phonefield_plain' => array(
+      'label' => t('Phone number'),
+      'field types' => array('phonefield_field'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function phonefield_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $elements = array();
+  foreach ($items as $delta => $item) {
+    $elements[$delta] = array(
+      '#theme' => 'phonefield_formatter_' . $display['type'],
+      '#element' => $item,
+      '#field' => $instance,
+      '#display' => $display,
+    );
+  }
+  return $elements;
+}
+
+/**
+ * Helper function to compute linklabel.
+ */
+function _phonefield_linklabel($elementlabel, $settings) {
+  $linkstate = $settings['linkstate'];
+  $linkvalue = $settings['linkvalue'];
+  switch ($linkstate) {
+    case 'static':
+      $linklabel = $linkvalue;
+      break;
+
+    case 'none':
+      $linklabel = '';
+      break;
+
+    default:
+      $linklabel = !empty($elementlabel) ? $elementlabel : $linkvalue;
+      break;
+  }
+  return $linklabel;
+}
+
+/**
+ * Helper function to check for telsupport.
+ *
+ * @return bool
+ *   TRUE if at least one hook says tel: is supported, or there are
+ *   no implementations of hook_honefield_supports_tel(), else FALSE.
+ */
+function _phonefield_tel_support() {
+  $results = module_invoke_all('phonefield_supports_tel');
+  if (empty($results)) {
+    return TRUE;
+  }
+  $telsupport = FALSE;
+  foreach ($results as $result) {
+    if ($result) {
+      $telsupport = TRUE;
+      break;
+    }
+  }
+  return $telsupport;
+}
+
+/**
+ * Theme function for 'default' text field formatter.
+ */
+function theme_phonefield_formatter_phonefield_default($vars) {
+  $element = $vars['element'];
+  $linklabel = _phonefield_linklabel($element['linklabel'], $vars['field']['settings']);
+  $telsupport = _phonefield_tel_support();
+
+  // Display a link if both link label and phone number are available.
+  if (!empty($linklabel) && !empty($element['phonenumber'])) {
+    if ($telsupport) {
+      $href = 'tel:' . phonefield_normalize($element['phonenumber']);
+      $url = t('<a href="!href">@label</a>', array('!href' => $href, '@label' => $linklabel));
+      return $url;
+    }
+    else {
+      return t('@prefix: @phone', array('@prefix' => $linklabel, '@phone' => $element['phonenumber']));
+    }
+  }
+  // If only a title, display the title.
+  elseif (!empty($linklabel)) {
+    return t('@label', array('@label' => $linklabel));
+  }
+  elseif (!empty($element['phonenumber'])) {
+    if ($telsupport) {
+      $href = 'tel:' . phonefield_normalize($element['phonenumber']);
+      $url = t('<a href="!href">@label</a>', array('!href' => $href, '@label' => $element['phonenumber']));
+      return $url;
+    }
+    else {
+      return check_plain($element['phonenumber']);
+    }
+  }
+  else {
+    return t('no phone');
+  }
+}
+
+/**
+ * Theme function for 'separate_link' text field formatter.
+ */
+function theme_phonefield_formatter_phonefield_separate_link($vars) {
+  $element = $vars['element'];
+  $linklabel = _phonefield_linklabel($element['linklabel'], $vars['field']['settings']);
+  $telsupport = _phonefield_tel_support();
+
+  // Display label and link if both link label and phone number are available.
+  if (!empty($linklabel) && !empty($element['phonenumber'])) {
+    if ($telsupport) {
+      $href = 'tel:' . phonefield_normalize($element['phonenumber']);
+      $url = t('@prefix: <a href="!href">!label</a>', array(
+        '@prefix' => $linklabel,
+        '!href' => $href,
+        '!label' => $element['phonenumber'],
+      ));
+      return $url;
+    }
+    else {
+      return t('@prefix: @phone', array('@prefix' => $linklabel, '@phone' => $element['phonenumber']));
+    }
+  }
+  // If only a title, display the title.
+  elseif (!empty($linklabel)) {
+    return t('@label', array('@label' => $linklabel));
+  }
+  elseif (!empty($element['phonenumber'])) {
+    if ($telsupport) {
+      $href = 'tel:' . phonefield_normalize($element['phonenumber']);
+      $url = t('<a href="!href">@label</a>', array('!href' => $href, '@label' => $element['phonenumber']));
+      return $url;
+    }
+    else {
+      return check_plain($element['phonenumber']);
+    }
+  }
+  else {
+    return t('no phone');
+  }
+}
+
+/**
+ * Theme function for 'separate_plain' text field formatter.
+ */
+function theme_phonefield_formatter_phonefield_separate_plain($vars) {
+  $element = $vars['element'];
+  // Display label and link if both link label and phone number are available.
+  $linklabel = _phonefield_linklabel($element['linklabel'], $vars['field']['settings']);
+  if (!empty($linklabel) && !empty($element['phonenumber'])) {
+    return t('@prefix: @phone', array('@prefix' => $linklabel, '@phone' => $element['phonenumber']));
+  }
+  // If only a title, display the title.
+  elseif (!empty($linklabel)) {
+    return t('@label', array('@label' => $linklabel));
+  }
+  else {
+    return !empty($element['phonenumber']) ? check_plain($element['phonenumber']) : t('no phone');
+  }
+}
+
+/**
+ * Theme function for 'plain' text field formatter.
+ */
+function theme_phonefield_formatter_phonefield_plain($vars) {
+  $element = $vars['element'];
+  return !empty($element['phonenumber']) ? check_plain($element['phonenumber']) : t('no phone');
+}
+
+/**
+ * Implements hook_field_update_instance().
+ */
+function phonefield_field_update_instance($instance, $prior_instance) {
+  if (function_exists('i18n_string_update') && isset($instance['widget']) && $instance['widget']['type'] == 'phonefield_field' && $prior_instance['settings']['linkvalue'] != $instance['settings']['linkvalue']) {
+    $i18n_string_name = "field:{$instance['field_name']}:{$instance['bundle']}:linkvalue";
+    i18n_string_update($i18n_string_name, $instance['settings']['linkvalue']);
+  }
+}
+
+/**
+ * Implements hook_i18n_string_list_TEXTGROUP_alter().
+ */
+function phonefield_i18n_string_list_field_alter(&$strings, $type = NULL, $object = NULL) {
+  if ($type != 'field_instance' || !is_array($object) || !isset($object['widget']['type'])) {
+    return;
+  }
+  if ($object['widget']['type'] == 'phonefield_field' && isset($object['settings']['linkvalue'])) {
+    $strings['field'][$object['field_name']][$object['bundle']]['linkvalue']['string'] = $object['settings']['linkvalue'];
+  }
+}
+
+/**
+ * Callback to extract field values.
+ */
+function _phonefield_user_import_callback($user_fields, $field_name, $values) {
+  $field = array();
+  for ($ii = 0; $ii < count($values); $ii++) {
+    if (!empty($values[$ii])) {
+      $field[LANGUAGE_NONE][$ii]['phonenumber'] = $values[$ii];
+    }
+  }
+  return $field;
+}
+
+/**
+ * Implements hook_field_user_import_supported_alter().
+ */
+function phonefield_field_user_import_supported_alter(&$supported) {
+  $supported['phonefield_field'] = array(
+   'save' => '_phonefield_user_import_callback',
+  );
+}
+
+
+
+/**
+ * Helper function.
+ *
+ * Normalize phone number.
+ * If $link is TRUE:
+ * Remove all non-numerics except '+' and '-'.
+ * Else:
+ * Remove all non-numerics.
+ *
+ * @param string $phoneno
+ *   The phone number to normalize.
+ * @param bool $link
+ *   If TRUE, make it suitable for a tel:-link.
+ *
+ * @return string
+ *   A normalized version of $phoneno.
+ */
+function phonefield_normalize($phoneno, $link = TRUE) {
+  return $link ?
+    preg_replace('/[^+-^0-9]/', '', $phoneno) :
+    preg_replace('/\D/', '', $phoneno);
+}
+
+/**
+ * Helper function.
+ *
+ * Get corresponding entity_id  and bundle.
+ *
+ * @param string $field
+ *   The field to look up.
+ * @param string $value
+ *   The value to look up.
+ *
+ * @return array
+ *   An array with the fields 'entity_id' and 'bundle' (or FALSE if
+ *   no result).
+ */
+function phonefield_get_entity_id($field, $value) {
+  $normalized = phonefield_normalize($value, FALSE);
+  // The $field param is used to derive various table and field names, but in
+  // each case the Database API automatically escapes these values. Note that
+  // the API does not do this for all arguments.
+  // @see: https://www.drupal.org/project/drupal/issues/2626026
+  $query = db_select('field_data_' . $field, 'fdf');
+  $query->fields('fdf', array('entity_id', 'bundle', $field . '_linklabel'));
+  $query->condition('fdf.' . $field . '_normalized', $normalized);
+  $eid = $query->execute()->fetchAssoc();
+  return $eid;
+}

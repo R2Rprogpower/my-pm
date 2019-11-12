@@ -1,0 +1,229 @@
+<?php
+
+/**
+ * @file
+ * Views Row Insert module.
+ */
+
+/**
+ * Implements hook_help().
+ *
+ * @inheritdoc
+ */
+function views_row_insert_help($path) {
+  switch ($path) {
+    case "admin/help#views_row_insert":
+      return t("View style plugin, which is capable to insert custom row with html unrestricted markup or blocks content into a view row results.");
+
+    break;
+  }
+}
+
+/**
+ * Helper function.
+ *
+ * @return array
+ *   Returns array of blocks for the default theme.
+ */
+function _views_row_insert_get_blocks() {
+  $theme = variable_get('theme_default');
+  module_load_include('inc', 'block', 'block.admin');
+  $blocks_all = block_admin_display_prepare_blocks($theme);
+  $blocks = [];
+  foreach ($blocks_all as $block) {
+    if (!empty($block['info'])) {
+      $blocks[$block['delta'] . '--views_row_insert--' . $block['module']] = $block['info'];
+    }
+    else {
+      $blocks[$block['delta']] = $block['delta'];
+    }
+  }
+  return $blocks;
+}
+
+/**
+ * Helper function, provides array of classes.
+ *
+ * @param array $options
+ *   Array of options from the plugin settings form.
+ * @param int $count
+ *   An integer containing current row number.
+ * @param int $max
+ *   Integer of total rows.
+ *
+ * @return array
+ *   Returns array of classes for the current row.
+ */
+function _views_row_insert_get_classes(array $options, $count, $max) {
+  $classes = array();
+  $default_rows = isset($options['default_rows']) ? $options['default_rows'] : FALSE;
+  $strip_rows = isset($options['strip_rows']) ? $options['strip_rows'] : FALSE;
+  if ($default_rows) {
+    $classes[] = 'views-row';
+    $classes[] = 'views-row-' . $count;
+  }
+  if ($strip_rows) {
+    $classes[] = 'views-row-' . ($count % 2 ? 'odd' : 'even');
+    if ($count == 1) {
+      $classes[] = 'views-row-first';
+    }
+    if ($count == $max) {
+      $classes[] = 'views-row-last';
+    }
+  }
+
+  return $classes;
+}
+
+/**
+ * Helper function, adds classes to the current row.
+ *
+ * @param string $row
+ *   String value containing current row element.
+ * @param array $classes
+ *   Array of classes.
+ *
+ * @return string
+ *   Returns current row wrapped with classes.
+ */
+function _views_row_insert_wrap_row($row, array $classes) {
+  if (count($classes) > 0) {
+    $class = implode(" ", $classes);
+    $row = '<div class="' . $class . '">' . $row . '</div>';
+  }
+  return $row;
+}
+
+/**
+ * Helper function. Provides last key of the array.
+ *
+ * @param array $new_rows
+ *   Array of processed rows.
+ *
+ * @return string
+ *   Returns key.
+ */
+function _views_row_insert_last_key(array $new_rows) {
+  $keys = array_keys($new_rows);
+  return (end($keys));
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function views_row_insert_views_api() {
+  return ['api' => 3];
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for theme_views_row_insert().
+ *
+ * @inheritdoc
+ */
+function template_preprocess_views_row_insert(&$vars) {
+  $view = $vars['view'];
+  $rows = $vars['rows'];
+  $style = $view->style_plugin;
+  $options = $style->options;
+  $use_plugin = isset($options['use_plugin']) ? $options['use_plugin'] : FALSE;
+  $data_mode = isset($options['data_mode']) ? $options['data_mode'] : 'block';
+  $insert_row = isset($options['custom_row_data']) ? $options['custom_row_data'] : '';
+  $block_id = isset($options['block_name']) ? $options['block_name'] : NULL;
+  $exclude_classes = isset($options['exclude_classes']) ? $options['exclude_classes'] : FALSE;
+  $insert_classes = isset($options['class_name']) ? $options['class_name'] : '';
+  if (!empty($insert_classes)) {
+    $insert_classes = preg_replace('/[^a-zA-Z0-9-_\s]/', '', $insert_classes);
+  }
+  $row_class = !empty($options['row_class']) ? $options['row_class'] : FALSE;
+  $rows_number = isset($options['rows_number']) ? $options['rows_number'] : 2;
+  $row_header = !empty($options['row_header']) ? TRUE : FALSE;
+  $row_footer = !empty($options['row_footer']) ? TRUE : FALSE;
+  $row_limit = !empty($options['row_limit_flag']) ? $options['row_limit'] : FALSE;
+  if ($row_limit == 0) {
+    $row_limit = FALSE;
+  }
+  // Make sure we are compatible with the previous version.
+  if (!empty($options['show_method'])) {
+    $row_limit = 1;
+  }
+  if ($data_mode == 'block') {
+    $block_meta = explode('--views_row_insert--', $block_id);
+    if (module_exists($block_meta[1])) {
+      $block = block_load($block_meta[1], $block_meta[0]);
+      $render_block = _block_render_blocks([$block]);
+      $render_block = _block_get_renderable_array($render_block);
+      $insert_row = drupal_render($render_block);
+    }
+  }
+  // Here we start inserting our row.
+  if ($use_plugin) {
+    $new_rows = array();
+    $k = 0;
+    $counter = 0;
+    $insert_keys = array();
+    if ($row_header) {
+      $new_rows[] = $insert_row;
+      $insert_keys[] = _views_row_insert_last_key($new_rows);
+      if ($row_limit) {
+        $counter++;
+      }
+    }
+    foreach ($rows as $id => $row) {
+      $k++;
+      $new_rows[] = $row;
+      if ($k == $rows_number) {
+        if (empty($row_limit)) {
+          $new_rows[] = $insert_row;
+          $insert_keys[] = _views_row_insert_last_key($new_rows);
+        }
+        elseif ($row_limit > $counter) {
+          $new_rows[] = $insert_row;
+          $insert_keys[] = _views_row_insert_last_key($new_rows);
+          $counter++;
+        }
+        $k = 0;
+      }
+    }
+    if ($row_footer) {
+      if (empty($row_limit)) {
+        $new_rows[] = $insert_row;
+        $insert_keys[] = _views_row_insert_last_key($new_rows);
+      }
+      elseif ($row_limit > $counter) {
+        $new_rows[] = $insert_row;
+        $insert_keys[] = _views_row_insert_last_key($new_rows);
+      }
+    }
+    if (!$exclude_classes) {
+      $max = count($new_rows);
+    }
+    else {
+      $max = count($rows);
+    }
+    foreach ($new_rows as $id => $row) {
+      $classes = array();
+      if (!in_array($id, $insert_keys)) {
+        $classes = _views_row_insert_get_classes($options, $id + 1, $max);
+        if ($row_class) {
+          $classes[] = $row_class;
+        }
+      }
+      elseif (!$exclude_classes) {
+        $classes = _views_row_insert_get_classes($options, $id + 1, $max);
+      }
+      if (in_array($id, $insert_keys) && (!empty($insert_classes))) {
+        $classes[] = $insert_classes;
+      }
+
+      $vars['processed_rows'][] = _views_row_insert_wrap_row($row, $classes);
+    }
+  }
+  else {
+    $max = count($rows);
+    foreach ($rows as $id => $row) {
+      $classes = _views_row_insert_get_classes($options, $id + 1, $max);
+      $vars['processed_rows'][] = _views_row_insert_wrap_row($row, $classes);
+    }
+  }
+
+}

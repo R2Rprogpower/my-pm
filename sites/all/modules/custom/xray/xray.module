@@ -1,0 +1,98 @@
+<?php
+ 
+
+/**
+*@file
+* Helps devs to study.
+*\
+/**
+ * Implements hook_form_alter().
+*/
+function xray_form_alter(&$form,&$form_state, $form_id) {
+    $form['xray_display_form_id'] = array(
+        '#type' => 'item',
+        '#title' => t('Form_ID'),
+        '#markup' => $form_id,
+        '#theme_wrappers' => array('container__xray__form'),
+        '#attributes' => array('class' => array('xray')),
+        '#weight' => -100
+    );   
+    
+}
+//function xray_form_alter(&$form,&$form_state, $form_id) {
+//    debug($form, $form_id, TRUE);
+//    
+//}
+/**
+ * Implements hook_help().
+*/
+function xray_help($path, $arg) {
+ 
+    
+    switch ($path) {
+        case 'vendors' :
+         return t('When the amount of the modules will get overwhelming, '
+                . 'wise programmer should use drush CLI in order to keep track of the installed modules');
+        break;
+        case 'vendors_view_in_region' :
+         return t('When the amount of the modules will get overwhelming, '
+                . 'wise programmer should use drush CLI in order to keep track of the installed modules');
+         break;
+        case 'admin/appearance' :
+         return _xray_help_admin_appearance();
+         break;
+    }
+}
+
+function  _xray_help_admin_appearance() {
+   debug(entity_get_info());
+    
+}
+//function _xray_help_admin_appearance() {
+// $output = '';       
+// $data = _xray_stats_enabled_themes();
+// $output .= format_plural(
+//         $data['num_hidden'], 
+//         'there is 1 hedden theme', 
+//         'there are @count hidden themes'
+// );
+// return theme('xray_help', array('text' => $output));
+//}
+//function _xray_stats_enabled_themes() {
+//    // инициализируем переменные для собираемых данных
+//    $themes = list_themes();
+//    $num_hidden =  0;
+//    foreach($themes as $themename => $theme){
+//        // проверяем наличие и значение переменной по которой определяем страницу   
+//        if(isset($theme->info['hidden']) && $theme->info['hidden']) {
+//            //собираем искомую информацию о темах(считаем кол-во скрытых)
+//            $num_hidden++;
+//        }
+//        
+//    }
+//    return compact('num_hidden');
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

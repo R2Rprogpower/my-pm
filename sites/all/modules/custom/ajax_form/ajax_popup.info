@@ -1,0 +1,4 @@
+name = ajax_popup
+description = shows inner structure of the site
+core = 7.x
+package = development

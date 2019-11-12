@@ -1,0 +1,5 @@
+name = Ajax Test
+description = ajax test
+core = 7.x
+scripts[] = ajax_link.js
+package = PM
