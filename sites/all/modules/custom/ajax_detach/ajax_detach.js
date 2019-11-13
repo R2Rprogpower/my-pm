@@ -180,7 +180,7 @@
                 //  list_closed.css('background-color', 'pink');
 
             });
-         
+         if ( $('.ajax-detach-user').size > 0 )
 	 $('.ajax-detach-user').ready(function () {
 
           $(this).click(function(e) {
@@ -188,15 +188,18 @@
                 var myUrl = $(this).attr('href');
 
                 if ( jQuery.post(myUrl, 0) ) {
-                    console.log('Post rq is sent to  '+myUrl);
+                    console.log('Post rq i21121s sent to  '+myUrl);
                     $(this).parent().parent().hide();
                 }
 
 
 
             });
-           
-            Object.size = function(obj) {
+    
+         });
+         
+         
+          Object.size = function(obj) {
                 var size = 0,
                     key;
                 for (key in obj) {
@@ -204,12 +207,7 @@
                 }
                 return size;
             };
-
-
-
-
-
-         });
+         
          }
     };
 
