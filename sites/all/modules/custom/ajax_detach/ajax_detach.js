@@ -167,7 +167,7 @@
                         var dropped_item_id = droppedItem.find('div.views-field.views-field-nid')[0].innerText;
 
                         // var newStatus = 'Closed';  
-                        var newStatus = 2;
+                        var newStatus = 6;
                         var myUrl = "/change_ticket_status/ajax/" + dropped_item_id + '/' + newStatus;
 
                         if (jQuery.post(myUrl, 0)) {
@@ -180,15 +180,16 @@
                 //  list_closed.css('background-color', 'pink');
 
             });
-         if ( $('.ajax-detach-user').size > 0 )
-	 $('.ajax-detach-user').ready(function () {
+          //$('.ajax-detach-user').attr('id','ajax-detach-user');
+	 
 
-          $(this).click(function(e) {
+            $('.ajax-detach-user').click(function(e) {
                 e.preventDefault();
+                
                 var myUrl = $(this).attr('href');
 
                 if ( jQuery.post(myUrl, 0) ) {
-                    console.log('Post rq i21121s sent to  '+myUrl);
+                   // console.log('Post rq is sent to  '+myUrl);
                     $(this).parent().parent().hide();
                 }
 
@@ -196,7 +197,7 @@
 
             });
     
-         });
+         
          
          
           Object.size = function(obj) {
