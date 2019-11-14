@@ -19,10 +19,11 @@
             $('form-item-end-date').css('color','red');
             $('h6:contains("Projects")').attr('id', 'custom-h6-project-style');
             $('h2:contains("Team")').attr('id', 'custom-h6-team-style');
-
-
-
             $('caption').attr('class', 'custom_caption');
+
+
+            $('.add_to_team_custom.ctools-use-modal-processed').attr('id', 'add_to_team_custom');
+            $('#user-add-to-project-form').css('background-color', 'black');
 
             var list_open = $('#list-open').find('.item-list');
 
