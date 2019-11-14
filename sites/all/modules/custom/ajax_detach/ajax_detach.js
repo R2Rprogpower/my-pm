@@ -19,10 +19,11 @@
             $('form-item-end-date').css('color','red');
             $('h6:contains("Projects")').attr('id', 'custom-h6-project-style');
             $('h2:contains("Team")').attr('id', 'custom-h6-team-style');
-
-
-
             $('caption').attr('class', 'custom_caption');
+
+
+            $('.add_to_team_custom.ctools-use-modal-processed').attr('id', 'add_to_team_custom');
+            $('#user-add-to-project-form').css('background-color', 'black');
 
             var list_open = $('#list-open').find('.item-list');
 
@@ -167,7 +168,7 @@
                         var dropped_item_id = droppedItem.find('div.views-field.views-field-nid')[0].innerText;
 
                         // var newStatus = 'Closed';  
-                        var newStatus = 2;
+                        var newStatus = 6;
                         var myUrl = "/change_ticket_status/ajax/" + dropped_item_id + '/' + newStatus;
 
                         if (jQuery.post(myUrl, 0)) {
@@ -180,23 +181,27 @@
                 //  list_closed.css('background-color', 'pink');
 
             });
-         
-	 $('.ajax-detach-user').ready(function () {
+          //$('.ajax-detach-user').attr('id','ajax-detach-user');
+	 
 
-          $(this).click(function(e) {
+            $('.ajax-detach-user').click(function(e) {
                 e.preventDefault();
+                
                 var myUrl = $(this).attr('href');
 
                 if ( jQuery.post(myUrl, 0) ) {
-                    console.log('Post rq is sent to  '+myUrl);
+                   // console.log('Post rq is sent to  '+myUrl);
                     $(this).parent().parent().hide();
                 }
 
 
 
             });
-           
-            Object.size = function(obj) {
+    
+         
+         
+         
+          Object.size = function(obj) {
                 var size = 0,
                     key;
                 for (key in obj) {
@@ -204,12 +209,7 @@
                 }
                 return size;
             };
-
-
-
-
-
-         });
+         
          }
     };
 
