@@ -179,11 +179,10 @@ table .custom_td{
  #custom-add-new-skill{
      
            float:right;
-           max-heigt:50px;
+            
            max-width: 150px;
            
-           text-weight: bold;
-           font-size: 20px;
+            font-size: 20px;
            width: 100px;
             margin-left:200px;
             
@@ -302,13 +301,15 @@ table .custom_td{
 .custom-button-add-skill{
    background-color: #4334c0;
     color:white;
+    margin: 10px;
+ 
     border-radius: 10px;
     width:130px;
     height: 50px;
     font-weight:600;
     font-size: 20px;
     margin-left: -500px;
-  
+      
 }
 .custom-button-add-ticket{
     background-color: #4334c0;
@@ -406,18 +407,20 @@ a .employees_image {
 }
 #role-label h6{
     padding-right: 5px;
-    margin-left: -206px;
-    font-size: 14px;
+     margin: 0;
+     text-align: left;
+     font-size: 14px;
     font-weight: bold;
-        margin-top: 0;
+    margin-top: 9px;
     margin-bottom: 3px;
     line-height: 10px;
+  
 }
 
 #email-label h6{
     padding-right: 5px;
-    margin-left: -198px;
-    font-size: 14px;
+ text-align: left;    
+ font-size: 14px;
     font-weight: bold;
         margin-top: 0;
     margin-bottom: 3px;
@@ -464,7 +467,7 @@ control-label.form-item.form-item-end-date.form-type-date-select.form-group {
     margin-left: -470px;
     
 } 
-.form-item.form-item-end-date.form-type-date-select.form-group { 
-    margin: 20px 0; 
-}
  
+#role-label {
+  padding-top: 10px;  
+}

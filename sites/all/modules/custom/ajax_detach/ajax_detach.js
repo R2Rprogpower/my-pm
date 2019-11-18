@@ -35,7 +35,7 @@
 
             var list_closed = $('#list-closed').find('.item-list');
 
-
+            $('#role-label').css('padding-top','10px');
 
             var drag_area = $('li.custom-row-class ').mousedown(function() {
                   drag_area.draggable({
