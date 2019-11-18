@@ -36,18 +36,10 @@ $header_ids = array();
 foreach ($day_names as $key => $value) {
   $header_ids[$key] = $value['header_id'];
 }
+ 
+ 
+ // drupal_set_message('<pre>'. print_r($ticket_table, true) .'</pre>');  
 
-
-       
-  $view = views_get_view('user_tickets');
-  $view->set_display('block_1');
-  $view->set_arguments(array(28));
-  // change the amount of items to show
-   $view->pre_execute();
-  $view->execute();
-  //drupal_set_message('<pre>'. print_r($view, true) .'</pre>');  
-  
-   
 ?>
 <div class="calendar-calendar"><div class="week-view">
 <table class="full">
@@ -78,11 +70,34 @@ foreach ($day_names as $key => $value) {
  
     <?php endfor; ?> 
       
-     <?php  // that's where titles of the tickets of the user filtered by responsible, not open, not closed,  must go   ?> 
-  
-    <?php foreach ($items as $time): ?>
-    <tr  class="not-all-day">
-      <td style="background-color: red;" class="calendar-agenda-hour">
+     <?php  // that's where titles of the tickets of the user filtered by responsible, not open, not closed,  must go   
+     
+     $view_name = 'user_tickets';
+ $view_display = 'block_1';
+
+       
+//  $view = views_get_view('user_tickets');
+//  $view->set_display('block_1');
+//  $view->set_arguments(array(28));
+//  // change the amount of items to show
+//   $view->pre_execute();
+//  $view->execute();
+     // in fututre the uid shall be transported through the URL if the correct permissions are set
+  $ticket_table = views_get_view_result($view_name, $view_display, array(28));
+  //get all tickets and projects.
+  $tickets = array();
+  $projects = array();
+  foreach ($ticket_table as $ticket){
+     $tickets[$ticket->nid] = $ticket->node_title;
+     $ticket_project_nid = $ticket->field_data_field_project_field_project_nid;
+     $proj = node_load($ticket_project_nid);
+     $projects[$proj->nid] = $proj->title;
+    
+  }
+    ?> 
+   <?php foreach ($items as $time): ?>
+    <tr class="not-all-day">
+      <td class="calendar-agenda-hour">
           
           
         <span class="calendar-hour"><?php print $time['hour']   ; ?></span><span class="calendar-ampm"><?php print $time['ampm']; ?></span>
