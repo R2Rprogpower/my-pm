@@ -80,7 +80,7 @@ function calendar_scrollToFirst($) {
 function calendar_resizeViewport($) {
   // Size of the browser window
   var viewportHeight = window.innerHeight ? window.innerHeight : $(window).height();
-  var top = $('#single-day-container').offset().top;
+  var top = $('#single-day-container').offset();
 
   // Give it a 20 pixel margin at the bottom
   //$('#single-day-container').height(viewportHeight - top - 20);

@@ -39,7 +39,7 @@ foreach ($day_names as $key => $value) {
 
 ?>
 
-    <div class="calendar-calendar">
+    <div style="margin-bottom: 50px;"  class="calendar-calendar">
         <div class="week-view">
             <table class="full">
                 <thead>
@@ -53,7 +53,7 @@ foreach ($day_names as $key => $value) {
                                 <?php $i = 0; foreach ($day_names as $cell): ?>
                                     <th class="<?php print $cell['class']; ?>" id="<?php print $cell['header_id']; ?>">
                                         <?php print $cell['data']; ?>,
-                                            <?php print date('d/m', strtotime("+$i day", $start_date)); $i++ ?>
+                                            <?php print $date =  date('d/m', strtotime("+$i day", $start_date)); $i++ ?>
                                     </th>
                                     <?php endforeach; ?>
 
@@ -72,25 +72,24 @@ foreach ($day_names as $key => $value) {
       }
     ?>
 
-                     <?php endfor; ?>
+     <?php endfor; ?>
 
     <?php  // that's where titles of the tickets of the user filtered by responsible, not open, not closed,  must go   
 
             $view_name = 'user_tickets';
             $view_display = 'block_1';
-            
-                            // in fututre the uid shall be transported through the URL if the correct permissions are set
+                                       // in fututre the uid shall be transported through the URL if the correct permissions are set
             $ticket_table = views_get_view_result($view_name, $view_display, array(28));
             //get all tickets and projects.
+            // just try to display this instead of rows
             
-             $ticket_table_1 .= views_embed_view($view_name, $view_display, 28);
+            $ticket_table_1 .= views_embed_view($view_name, $view_display, 28);
             
-          drupal_set_message(print_r($ticket_table_1, TRUE));  
-           
-             
+          //drupal_set_message(print_r($ticket_table_1, TRUE));  
           
-         
-            $projects_and_tickets = array();
+             $projects_and_tickets = array();
+             drupal_set_message('<pre>'. print_r('input of foreach 1', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r(count($ticket_table), TRUE) .'</pre>');  
 
             foreach ($ticket_table as $ticket) {
 
@@ -104,10 +103,24 @@ foreach ($day_names as $key => $value) {
                 $projects_and_tickets[$tick_indx] = $ticket->node_title;
  
              }  
-
-            $projects_and_tickets_to_str_index =  implode(' ',array_keys($projects_and_tickets) );
+             
+            
+             drupal_set_message('<pre>'. print_r('output of foreach 1', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($projects_and_tickets, TRUE) .'</pre>');  
+            
+             
+             
+             
+             
+             $projects_and_tickets_to_str_index =  implode(' ',array_keys($projects_and_tickets) );
             $project_nids = explode('proj_', $projects_and_tickets_to_str_index);
             $project_nids_trimmed = array();
+                         
+
+              drupal_set_message('<pre>'. print_r('input of foreach 2', TRUE) .'</pre>');  
+              drupal_set_message('<pre>'. print_r($projects_and_tickets_to_str_index, TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
+            
             foreach ($project_nids as $elem){
                if( !empty($elem) ) {
                   $project_nids_trimmed[] = $elem[0];
@@ -115,6 +128,14 @@ foreach ($day_names as $key => $value) {
            }
 
             $project_nids = $project_nids_trimmed;
+            
+            
+              drupal_set_message('<pre>'. print_r('output of foreach 2', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
+             
+              drupal_set_message('<pre>'. print_r('input of foreach 3', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
+             
 
            // drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
             $i = 0;
@@ -131,7 +152,15 @@ foreach ($day_names as $key => $value) {
 
                  }
                  
-             }           
+             }
+             
+             
+              drupal_set_message('<pre>'. print_r('output of foreach 3', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($proj_poses, TRUE) .'</pre>');  
+            
+              drupal_set_message('<pre>'. print_r('input of foreach 4', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>'); 
+             
           //  drupal_set_message('<pre>'. print_r($proj_poses, TRUE) .'</pre>');
             $projects_and_tickets_arr = array();
             $i = 0;
@@ -144,21 +173,31 @@ foreach ($day_names as $key => $value) {
 
                 $i++;
             }
+            
+            
+              drupal_set_message('<pre>'. print_r('output of foreach 4', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($projects_and_tickets_arr, TRUE) .'</pre>');  
+                   drupal_set_message('<pre>'. print_r('input of foreach 5', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($projects_and_tickets_arr, TRUE) .'</pre>');
+            
+            
             $new_projects_and_tickets = array();
             
             foreach ( $projects_and_tickets_arr as $arr ) {
                 $new_projects_and_tickets  =  array_merge($new_projects_and_tickets, $arr);
             }
        //     drupal_set_message('<pre>'. print_r($new_projects_and_tickets, TRUE) .'</pre>');  
-
+            drupal_set_message('<pre>'. print_r('output of foreach 5', TRUE) .'</pre>');  
+             drupal_set_message('<pre>'. print_r($new_projects_and_tickets, TRUE) .'</pre>');  
  
-              
+                                   
               
 
     ?>
+                                    <?php //     $ticket_table_1 ?>
                                     <?php foreach ($new_projects_and_tickets as $index => $title): ?>
-                                        <tr class="not-all-day">
-                                            <td id="<?php print $index; ?>" class="calendar-agenda-hour">
+                                        <tr  class="not-all-day">
+                                            <td id="<?php print $index[0]; ?>" class="calendar-agenda-hour">
 
                                                 <span class="calendar-hour"><a href = "/node/<?php $prenid = explode('_', $index); $nid = $prenid[1];   print $nid ;?>" ><?php print $title   ; ?></a></span>
 
@@ -170,15 +209,15 @@ foreach ($day_names as $key => $value) {
 
                                                         <?php $curpos = $colpos + 1;?>
 
-                                                            <td class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
-                                                                <div class="calendar">
+                                                            <td id ="<?php print  $prenid[0] . '_' . $prenid[1] . ' day name nubmer_' . $index .  ' 7th date_'.$date ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+                                                                <div  class="calendar">
                                                                     <div style="text-align: center;" class="inner">
                                                                         <?php // that's where all the forms and buttons must go ?>
                                                                         
                                                                         
                                                                             <?php if( $prenid[0] == 'tick') :?>
 
-                                                                                <input style="width:30px;" type="text"></input>
+                                                                                <input  style="width:30px;" type="text"></input>
 
                                                                             <?php endif; ?>
                                                                                 
@@ -186,8 +225,8 @@ foreach ($day_names as $key => $value) {
                                                                                 
 
                                                                     </div>
-                                                                </div>
-                                                            </td>
+                                                              
+                                                            </td   >
                                                             <?php endforeach; ?>
 
                                         </tr>
@@ -196,3 +235,25 @@ foreach ($day_names as $key => $value) {
             </table>
         </div>
     </div>
+<div id="single-day-container">
+    <?php if (!empty($scroll_content)) : ?>
+    <script>
+      try {
+        // Hide container while it renders...  Degrade w/o javascript support
+        jQuery('#single-day-container').css('visibility','hidden');
+      }catch(e){ 
+        // swallow 
+      }
+    </script>
+    <?php endif; ?>
+    <table class="full">
+      <tbody>
+    <td class="calendar-time-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td></tr>
+        <tr>
+          
+        </tr>
+      </tbody>
+    </table>
+  </div>
+ </div></div>
+ 
