@@ -97,7 +97,8 @@ foreach ($day_names as $key => $value) {
             foreach ($nodes as $node){ 
                      
                    if (array_keys($nodes)[0] !== $node->nid && $node->type == 'project') {
-                                $projects_and_tickets['total_' . explode( '_', $proj_indx)[1]] =   'Total';
+                                $total_index = explode( '_', $proj_indx)[1]; 
+                                $projects_and_tickets['total_' . $total_index] =   'Total';
                     }
                     
                     switch ($node->type) {
@@ -114,12 +115,14 @@ foreach ($day_names as $key => $value) {
                             break;
                     }
             }
-                  unset( $projects_and_tickets['total_']);
-                  $projects_and_tickets['total_' . $proj_indx] =   'Total';
+            
+            unset( $projects_and_tickets['total_']);
+            $total_index = explode( '_', $proj_indx)[1]; 
+            $projects_and_tickets['total_' . $total_index] =   'Total';
+                        
                   
                   
-                  
-            drupal_set_message('<pre>'. print_r($projects_and_tickets, TRUE) .'</pre>');  
+            //drupal_set_message('<pre>'. print_r($projects_and_tickets, TRUE) .'</pre>');  
 
           
                                    
@@ -130,64 +133,30 @@ foreach ($day_names as $key => $value) {
                                     <?php foreach ($projects_and_tickets as $index => $title): ?>
                                         <tr  class="not-all-day">
                                             <td id="<?php print $index[0]; ?>" class="calendar-agenda-hour">
-
                                                 <span class="calendar-hour"><a href = "/node/<?php $prenid = explode('_', $index); $nid = $prenid[1];   print $nid ;?>" ><?php print $title   ; ?></a></span>
-
                                             </td>
 
                                             <?php $curpos = 0; ?>
                                                 <?php foreach ($columns as $index => $column): ?>
                                                     <?php $colpos = (isset($title['values'][$column][0])) ? $title['values'][$column][0]['wday'] : $index; ?>
-
                                                         <?php $curpos = $colpos + 1;?>
-                                                        
                                                             <td id ="<?php print  $prenid[0] . '_' . $prenid[1] . ' day name nubmer_' . $index .  ' 7th day date_'.$date ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
-                                                               
-                                                                
                                                                 <div  class="calendar">
                                                                     <div style="text-align: center;" class="inner">
-                                                                        <?php // that's where all the forms and buttons must go ?>
-                                                                        
-                                                                        
                                                                             <?php if( $prenid[0] == 'tick') :?>
-
                                                                                 <input  style="width:30px;" type="text"></input>
-
                                                                             <?php endif; ?>
-                                                                                
-                                                                                
-                                                                                
-
                                                                     </div>
-                                                              
-                                                            </td   >
-                                                            <?php endforeach; ?>
-
+                                                            </td>
+                                                <?php endforeach; ?>
                                         </tr>
-                                        <?php endforeach; ?>
+                                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
     </div>
 <div id="single-day-container">
-    <?php if (!empty($scroll_content)) : ?>
-    <script>
-      try {
-        // Hide container while it renders...  Degrade w/o javascript support
-        jQuery('#single-day-container').css('visibility','hidden');
-      }catch(e){ 
-        // swallow 
-      }
-    </script>
-    <?php endif; ?>
-    <table class="full">
-      <tbody>
-    <td class="calendar-time-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td><td class="calendar-day-holder"></td></tr>
-        <tr>
-          
-        </tr>
-      </tbody>
-    </table>
+ 
   </div>
  </div></div>
  
