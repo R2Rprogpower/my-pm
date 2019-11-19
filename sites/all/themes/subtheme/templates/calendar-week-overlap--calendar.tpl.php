@@ -78,8 +78,11 @@ foreach ($day_names as $key => $value) {
 
             $view_name = 'user_tickets';
             $view_display = 'block_1';
-                                       // in fututre the uid shall be transported through the URL if the correct permissions are set
-            $ticket_table = views_get_view_result($view_name, $view_display, array(28));
+            if(!empty(arg(1))){
+                $uid = array( arg(1) );
+                
+            }                      // in fututre the uid shall be transported through the URL if the correct permissions are set
+            $ticket_table = views_get_view_result($view_name, $view_display,  $uid );
             //get all tickets and projects.
             $proj_and_tick_nids = array();
             foreach ($ticket_table as $ticket) {
@@ -92,13 +95,13 @@ foreach ($day_names as $key => $value) {
             $proj_and_tick_nids_unique = array_unique($proj_and_tick_nids);
             
             $nodes = node_load_multiple($proj_and_tick_nids_unique); 
- 
+            $total_field_text = t('Total');
             $projects_and_tickets = array();
             foreach ($nodes as $node){ 
                      
                    if (array_keys($nodes)[0] !== $node->nid && $node->type == 'project') {
                                 $total_index = explode( '_', $proj_indx)[1]; 
-                                $projects_and_tickets['total_' . $total_index] =   'Total';
+                                $projects_and_tickets['total_' . $total_index] =   $total_field_text;
                     }
                     
                     switch ($node->type) {
@@ -118,16 +121,9 @@ foreach ($day_names as $key => $value) {
             
             unset( $projects_and_tickets['total_']);
             $total_index = explode( '_', $proj_indx)[1]; 
-            $projects_and_tickets['total_' . $total_index] =   'Total';
+            $projects_and_tickets['total_' . $total_index] =   $total_field_text;
                         
-                  
-                  
-            //drupal_set_message('<pre>'. print_r($projects_and_tickets, TRUE) .'</pre>');  
-
-          
-                                   
-              
-
+                        
     ?>
                                     <?php //     $ticket_table_1 ?>
                                     <?php foreach ($projects_and_tickets as $index => $title): ?>
@@ -144,7 +140,7 @@ foreach ($day_names as $key => $value) {
                                                                 <div  class="calendar">
                                                                     <div style="text-align: center;" class="inner">
                                                                             <?php if( $prenid[0] == 'tick') :?>
-                                                                                <input  style="width:30px;" type="text"></input>
+                                                                                <input  style="width:30px;" type="text"></input> <button  style="width:10px;" type="text"></button>
                                                                             <?php endif; ?>
                                                                     </div>
                                                             </td>

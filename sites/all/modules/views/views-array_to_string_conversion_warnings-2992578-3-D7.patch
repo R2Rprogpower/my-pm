@@ -1,0 +1,89 @@
+diff --git a/handlers/views_handler_field.inc b/handlers/views_handler_field.inc
+index f33cf884..f20171f4 100644
+--- a/handlers/views_handler_field.inc
++++ b/handlers/views_handler_field.inc
+@@ -1426,7 +1426,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
+       // Use strip tags as there should never be HTML in the path. However, we
+       // need to preserve special characters like " that were removed by
+       // check_plain().
+-      $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(decode_entities($this->view->args[$count - 1])) : '';
++      $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(decode_entities(views_arg_flatten($this->view->args[$count - 1]))) : '';
+     }
+ 
+     // Get flattened set of tokens for any array depth in $_GET parameters.
+diff --git a/includes/view.inc b/includes/view.inc
+index 13e4987f..20b24a5c 100644
+--- a/includes/view.inc
++++ b/includes/view.inc
+@@ -870,9 +870,11 @@ class view extends views_db_object {
+           $argument->query($this->display_handler->use_group_by());
+         }
+ 
++        $arg_flat = views_arg_flatten($arg);
++
+         // Add this argument's substitution.
+         $substitutions['%' . ($position + 1)] = $arg_title;
+-        $substitutions['!' . ($position + 1)] = strip_tags(decode_entities($arg));
++        $substitutions['!' . ($position + 1)] = strip_tags(decode_entities($arg_flat));
+ 
+         // Since we're really generating the breadcrumb for the item above us,
+         // check the default action of this argument.
+diff --git a/plugins/views_plugin_display.inc b/plugins/views_plugin_display.inc
+index fd8de19e..4a8bb72a 100644
+--- a/plugins/views_plugin_display.inc
++++ b/plugins/views_plugin_display.inc
+@@ -1142,7 +1142,7 @@ class views_plugin_display extends views_plugin {
+       // Use strip tags as there should never be HTML in the path.
+       // However, we need to preserve special characters like " that
+       // were removed by check_plain().
+-      $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(decode_entities($this->view->args[$count - 1])) : '';
++      $tokens['!' . $count] = isset($this->view->args[$count - 1]) ? strip_tags(decode_entities(views_arg_flatten($this->view->args[$count - 1]))) : '';
+     }
+ 
+     return $tokens;
+diff --git a/views.module b/views.module
+index 1e10ddc1..448f31a2 100644
+--- a/views.module
++++ b/views.module
+@@ -2563,6 +2563,41 @@ function views_array_key_plus($array) {
+   return $array;
+ }
+ 
++/**
++ * Flatten argument if it is array.
++ *
++ * Flatting means finding all values recursively and joining them by comma.
++ * Otherwise decode_entities() / html_entity_decode() will give warnings.
++ *
++ * @param string|array $arg
++ *   Argument to flatten.
++ *
++ * @return string
++ *   Return flat string.
++ */
++function views_arg_flatten($arg) {
++  $type = gettype($arg);
++  switch ($type) {
++    case 'string':
++      return $arg;
++
++    case 'integer':
++      return (string) $arg;
++
++    case 'array':
++      $flat = [];
++      array_walk_recursive($arg, function($a) use (&$flat) { $flat[] = $a; });
++      $flat = implode(', ', $flat);
++      return $flat;
++
++    default:
++      $message = 'Unexpected argument type: @type';
++      $variables = array('@type' => $type);
++      watchdog('views', $message, $variables, WATCHDOG_WARNING);
++      return '';
++  }
++}
++
+ /**
+  * Implements hook_ctools_plugin_api_hook_name().
+  *
