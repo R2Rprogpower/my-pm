@@ -81,121 +81,53 @@ foreach ($day_names as $key => $value) {
                                        // in fututre the uid shall be transported through the URL if the correct permissions are set
             $ticket_table = views_get_view_result($view_name, $view_display, array(28));
             //get all tickets and projects.
-            // just try to display this instead of rows
-            
-            $ticket_table_1 .= views_embed_view($view_name, $view_display, 28);
-            
-          //drupal_set_message(print_r($ticket_table_1, TRUE));  
-          
-             $projects_and_tickets = array();
-             drupal_set_message('<pre>'. print_r('input of foreach 1', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r(count($ticket_table), TRUE) .'</pre>');  
-
+            $proj_and_tick_nids = array();
             foreach ($ticket_table as $ticket) {
-
-                $ticket_project_nid = $ticket->field_data_field_project_field_project_nid;
-                $proj = node_load($ticket_project_nid);
-                $proj_indx =   'proj_' . $proj->nid;
-
-                $tick_indx = 'tick_' . $ticket->nid;
-
-                $projects_and_tickets[$proj_indx] = $proj->title;
-                $projects_and_tickets[$tick_indx] = $ticket->node_title;
+                
+                $proj_and_tick_nids[] =    $ticket->field_data_field_project_field_project_nid;
+                $proj_and_tick_nids[] =    $ticket->nid;
  
              }  
              
+            $proj_and_tick_nids_unique = array_unique($proj_and_tick_nids);
             
-             drupal_set_message('<pre>'. print_r('output of foreach 1', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($projects_and_tickets, TRUE) .'</pre>');  
-            
-             
-             
-             
-             
-             $projects_and_tickets_to_str_index =  implode(' ',array_keys($projects_and_tickets) );
-            $project_nids = explode('proj_', $projects_and_tickets_to_str_index);
-            $project_nids_trimmed = array();
-                         
-
-              drupal_set_message('<pre>'. print_r('input of foreach 2', TRUE) .'</pre>');  
-              drupal_set_message('<pre>'. print_r($projects_and_tickets_to_str_index, TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
-            
-            foreach ($project_nids as $elem){
-               if( !empty($elem) ) {
-                  $project_nids_trimmed[] = $elem[0];
-                }
-           }
-
-            $project_nids = $project_nids_trimmed;
-            
-            
-              drupal_set_message('<pre>'. print_r('output of foreach 2', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
-             
-              drupal_set_message('<pre>'. print_r('input of foreach 3', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
-             
-
-           // drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>');  
-            $i = 0;
-            $proj_poses = array();
-            foreach ($projects_and_tickets as $key => $value) {
-
-                if( $key == 'proj_' . $project_nids[$i] ){
-            
-                    $project_row_key =  array_search($key, array_keys($projects_and_tickets) ) ;
-
-                    $proj_poses[] = $project_row_key;
-                        
-                    $i++;
-
-                 }
-                 
-             }
-             
-             
-              drupal_set_message('<pre>'. print_r('output of foreach 3', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($proj_poses, TRUE) .'</pre>');  
-            
-              drupal_set_message('<pre>'. print_r('input of foreach 4', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($project_nids, TRUE) .'</pre>'); 
-             
-          //  drupal_set_message('<pre>'. print_r($proj_poses, TRUE) .'</pre>');
-            $projects_and_tickets_arr = array();
-            $i = 0;
-            foreach ($project_nids as $key => $value) {
-                $offest = $proj_poses[$i];
-                $length =   isset($proj_poses[$i+1]) ? $proj_poses[$i+1] -  $proj_poses[$i] : $proj_poses[$i];
-                $projects_and_tickets_arr[$key] = array_slice($projects_and_tickets, $offest, $length, TRUE);
-
-                $projects_and_tickets_arr[$key]['total_' . $value] =   'Total' ;
-
-                $i++;
-            }
-            
-            
-              drupal_set_message('<pre>'. print_r('output of foreach 4', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($projects_and_tickets_arr, TRUE) .'</pre>');  
-                   drupal_set_message('<pre>'. print_r('input of foreach 5', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($projects_and_tickets_arr, TRUE) .'</pre>');
-            
-            
-            $new_projects_and_tickets = array();
-            
-            foreach ( $projects_and_tickets_arr as $arr ) {
-                $new_projects_and_tickets  =  array_merge($new_projects_and_tickets, $arr);
-            }
-       //     drupal_set_message('<pre>'. print_r($new_projects_and_tickets, TRUE) .'</pre>');  
-            drupal_set_message('<pre>'. print_r('output of foreach 5', TRUE) .'</pre>');  
-             drupal_set_message('<pre>'. print_r($new_projects_and_tickets, TRUE) .'</pre>');  
+            $nodes = node_load_multiple($proj_and_tick_nids_unique); 
  
+            $projects_and_tickets = array();
+            foreach ($nodes as $node){ 
+                     
+                   if (array_keys($nodes)[0] !== $node->nid && $node->type == 'project') {
+                                $projects_and_tickets['total_' . explode( '_', $proj_indx)[1]] =   'Total';
+                    }
+                    
+                    switch ($node->type) {
+                        case 'project':
+                               
+                            $proj_indx =   'proj_' . $node->nid;
+                            $projects_and_tickets[$proj_indx] = $node->title;
+                            
+                            break;
+                        case 'ticket':
+                            
+                            $tick_indx = 'tick_' . $node->nid;
+                            $projects_and_tickets[$tick_indx] = $node->title;
+                            break;
+                    }
+            }
+                  unset( $projects_and_tickets['total_']);
+                  $projects_and_tickets['total_' . $proj_indx] =   'Total';
+                  
+                  
+                  
+            drupal_set_message('<pre>'. print_r($projects_and_tickets, TRUE) .'</pre>');  
+
+          
                                    
               
 
     ?>
                                     <?php //     $ticket_table_1 ?>
-                                    <?php foreach ($new_projects_and_tickets as $index => $title): ?>
+                                    <?php foreach ($projects_and_tickets as $index => $title): ?>
                                         <tr  class="not-all-day">
                                             <td id="<?php print $index[0]; ?>" class="calendar-agenda-hour">
 
@@ -208,8 +140,10 @@ foreach ($day_names as $key => $value) {
                                                     <?php $colpos = (isset($title['values'][$column][0])) ? $title['values'][$column][0]['wday'] : $index; ?>
 
                                                         <?php $curpos = $colpos + 1;?>
-
-                                                            <td id ="<?php print  $prenid[0] . '_' . $prenid[1] . ' day name nubmer_' . $index .  ' 7th date_'.$date ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+                                                        
+                                                            <td id ="<?php print  $prenid[0] . '_' . $prenid[1] . ' day name nubmer_' . $index .  ' 7th day date_'.$date ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+                                                               
+                                                                
                                                                 <div  class="calendar">
                                                                     <div style="text-align: center;" class="inner">
                                                                         <?php // that's where all the forms and buttons must go ?>
