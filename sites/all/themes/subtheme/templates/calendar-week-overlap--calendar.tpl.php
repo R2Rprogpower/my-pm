@@ -140,7 +140,7 @@ foreach ($day_names as $key => $value) {
                                                                 <div  class="calendar">
                                                                     <div style="text-align: center;" class="inner">
                                                                             <?php if( $prenid[0] == 'tick') :?>
-                                                                                <input  style="width:30px;" type="text"></input> <button  style="width:10px;" type="text"></button>
+                                                                                <input  style="font-size:15px;text-align: center;height:23px;width:23px;    margin: 5% 0 5% 0;"  maxlength="2" type="text"></input> <button class="custom-button-timesheets-plus"  style="width:10px;"  >+</button>
                                                                             <?php endif; ?>
                                                                     </div>
                                                             </td>

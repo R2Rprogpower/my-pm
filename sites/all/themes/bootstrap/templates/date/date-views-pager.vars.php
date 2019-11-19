@@ -52,23 +52,37 @@ function bootstrap_preprocess_date_views_pager(array &$variables) {
     $options += array('attributes' => array());
 
     $url = $variables[$type . '_url'];
+    
+//    drupal_set_message('<pre>'. print_r($url, TRUE) .'</pre>');  
+//
+    $url = explode('/',$url);
+    // drupal_set_message('<pre>'. print_r($url, TRUE) .'</pre>');  
+    $url[4] = $url[8];
+    unset($url[8]);
+    $new_url ='';
+    foreach ($url as $i_url){
+          
+         $new_url .= '/'.$i_url;
+     }
+     $url = substr($new_url, 1); 
+      // drupal_set_message('<pre>'. print_r($url, TRUE) .'</pre>');  
+
     // Make the item disabled if there is no URL.
     if (!$url) {
       $url = '#';
       $item_classes[] = 'disabled';
       $options['absolute'] = TRUE;
       $options['external'] = TRUE;
+               //drupal_set_message('<pre>'. print_r('external' . $url, TRUE) .'</pre>');  
+
     }
     // Convert titles into tooltips, if enabled.
-    elseif (!empty($options['attributes']['title']) && bootstrap_setting('tooltip_enabled')) {
-      $options['attributes']['data-toggle'] = 'tooltip';
-      $options['attributes']['data-placement'] = 'bottom';
-    }
+    
 
     // Create a link.
     $link = array(
       '#theme' => 'link__date_views__pager__' . $type,
-      '#text' => $text,
+      '#text' => $text  ,
       '#path' => $url,
       '#options' => $options,
     );

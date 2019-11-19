@@ -311,6 +311,25 @@ table .custom_td{
     margin-left: -500px;
       
 }
+.custom-button-timesheets{
+   background-color: #4334c0;
+    color:white;
+    margin: 10px;
+ 
+    border-radius: 10px;
+    width:130px;
+    height: 50px;
+    font-weight:600;
+    font-size: 20px;
+   
+      
+}
+
+.custom-button-timesheets-plus {
+     background-color: white;
+     border:0;
+      font-size: 17px;
+}
 .custom-button-add-ticket{
     background-color: #4334c0;
     color:white;
