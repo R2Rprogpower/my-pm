@@ -26,4 +26,3 @@ function ajax_modal_my_popup_forms_page_callback($js = NULL) {
     return drupal_get_form('user_add_to_project_form');
     }
 }
- 

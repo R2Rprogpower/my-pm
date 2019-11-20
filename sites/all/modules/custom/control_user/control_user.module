@@ -225,7 +225,11 @@ function dashboard_add_new_task_form($form, &$form_state) {
                     '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
                     '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
                     '#date_year_range' => '-3:+3', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
-                    '#description' => t('Choose the start date for the ticket.')
+                    '#description' => t('Choose the start date for the ticket.'),
+//                     '#ajax' => array(
+//                  'callback' => 'ajax_form_end_date_submit',
+//                  'event' => 'click',
+//                    ),
                 );
                 $form['reporter'] = array(
                     '#type' => 'select',
@@ -312,7 +316,23 @@ function dashboard_add_new_task_form($form, &$form_state) {
     return $form;
 }
 function dashboard_add_new_task_form_validate($form, &$form_state) {
+    
+    
 }
+//
+//function ajax_form_end_date_submit($form, &$form_state){
+//    
+//    
+//     ctools_include('ajax');
+//          ctools_include('modal');
+//          ctools_modal_add_js(); 
+//          
+//          
+//    drupal_set_message('<pre>'. print_r($form_state['values']['start_date'], true) .'</pre>');  
+//
+//}
+
+
 function dashboard_add_new_task_form_submit($form, &$form_state) {
     global $user;
     $nid = arg(1);
@@ -770,7 +790,7 @@ function get_role_by_rid($rid) {
     return $roles;
 }
 function get_access_pm_value($current_roles) {
-    // checks if global $user->roles has admin or pm value
+    // checks if global $user->roles has pm value
     $admin_role = get_role_by_rid(3);
     $pm_role = get_role_by_rid(6);
     $access_value = 0;
@@ -782,7 +802,7 @@ function get_access_pm_value($current_roles) {
     return $access_value;
 }
 function get_access_admin_value($current_roles) {
-    // checks if global $user->roles has admin or pm value
+    // checks if global $user->roles has admi 
     $admin_role = get_role_by_rid(3);
     $access_value = 0;
     foreach ($current_roles as $role) {

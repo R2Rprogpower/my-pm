@@ -29,7 +29,12 @@ class references_handler_argument extends views_handler_argument_numeric {
     // array.
     $titles = array();
     foreach ($this->value as $key) {
+  // drupal_set_message('<pre>'. print_r($key, true) .'</pre>');  
+       if (is_array($key)){
+        $key = $key[0];
+       }
       if (isset($results[$key])) {
+          
         $titles[] = check_plain($results[$key]);
       }
     }

@@ -30,6 +30,10 @@ $index = 0;
 $header_ids = array();
 
 $start_date = date_format($view->date_info->min_date, 'U'); 
+ //$node_1 = node_load(64); drupal_set_message('<pre>'. print_r($node_1, TRUE) .'</pre>');  
+
+
+
 
 foreach ($day_names as $key => $value) {
   $header_ids[$key] = $value['header_id'];
@@ -51,9 +55,10 @@ foreach ($day_names as $key => $value) {
                             <?php endif;?>
 
                                 <?php $i = 0; foreach ($day_names as $cell): ?>
-                                    <th class="<?php print $cell['class']; ?>" id="<?php print $cell['header_id']; ?>">
-                                        <?php print $cell['data']; ?>,
-                                            <?php print $date =  date('d/m', strtotime("+$i day", $start_date)); $i++ ?>
+                                    <th class="<?php print $cell['class']; ?>" id="<?php print $date =  date('d/m', strtotime("+$i day", $start_date));  ?>">
+                                       <!-- <?php  print $cell['data']; ?>, -->
+                                            <?php print $date ?>
+                                         <?php  $dates[] = $date = date('d/m/y', strtotime("+$i day", $start_date)); $i++; ?>
                                     </th>
                                     <?php endforeach; ?>
 
@@ -79,7 +84,7 @@ foreach ($day_names as $key => $value) {
             $view_name = 'user_tickets';
             $view_display = 'block_1';
             if(!empty(arg(1))){
-                $uid = array( arg(1) );
+                $uid = arg(1) ;
                 
             }                      // in fututre the uid shall be transported through the URL if the correct permissions are set
             $ticket_table = views_get_view_result($view_name, $view_display,  $uid );
@@ -136,12 +141,71 @@ foreach ($day_names as $key => $value) {
                                                 <?php foreach ($columns as $index => $column): ?>
                                                     <?php $colpos = (isset($title['values'][$column][0])) ? $title['values'][$column][0]['wday'] : $index; ?>
                                                         <?php $curpos = $colpos + 1;?>
-                                                            <td id ="<?php print  $prenid[0] . '_' . $prenid[1] . ' day name nubmer_' . $index .  ' 7th day date_'.$date ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+                                             
+                                                            <td id ="<?php print $cell_id =   ( $prenid[0] == 'total') ?  $prenid[0] . '_' . $prenid[1] . '_' . $dates[$index] :  $prenid[1] . '_' . $dates[$index] ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+
+                                                                
+                                                                
+                                                                
                                                                 <div  class="calendar">
                                                                     <div style="text-align: center;" class="inner">
+                                                                        
                                                                             <?php if( $prenid[0] == 'tick') :?>
-                                                                                <input  style="font-size:15px;text-align: center;height:23px;width:23px;    margin: 5% 0 5% 0;"  maxlength="2" type="text"></input> <button class="custom-button-timesheets-plus"  style="width:10px;"  >+</button>
+                                                                        <input  style="font-size:15px;text-align: center;height:23px;width:23px;    margin: 5% 0 5% 0;"  maxlength="2" type="text"></input> 
+                                                                             
+                                                                                      <?php
+
+                                                                          $text = "<button  style=\"width:10px;\"  class=\"custom-button-timesheets-plus\">
+                                                                          +
+                                                                          </button>"   ;
+                                                                          
+                                                                          $new_href_data = explode ('_', $cell_id); 
+                                                                          $ticket_nid = $new_href_data[0];
+                                                                          
+                                                                          $date_explode = explode('/',$new_href_data[1]);
+                                                                                    
+                                                                          $day  = $date_explode[0];
+                                                                          $month  = $date_explode[1];     
+                                                                          $year  = $date_explode[2];
+                                                                          $date = "/" .$day . '_' . $month . '_' . $year;
+                                                                          $path =  '/user/' . arg(1) . '/timesheets/week';
+                                                                           $modal_part = '/ajax/nojs/';
+                                                                          
+                                                                          
+                                                                            $url = $path .  $modal_part . $ticket_nid .  $date; 
+                                                                          
+                                                                              $dest = $url;
+                                                                              
+                        
+                                                                              $alt = 'show a popup immediately';
+
+                                                                              $link = ctools_modal_text_button($text, $dest, $alt);
+
+                                                                              $build = array(
+                                                                                  '#markup' =>$link, 
+                                                                                  );
+
+                                                                              print render($build);   
+
+                                                                            
+                                                                            ?>
+                                                                            
+                                                          
+                                                                            
+                                                                            
                                                                             <?php endif; ?>
+                                                                            
+                                                                            
+                                                                             <?php if( $prenid[0] == 'total') :?>
+                                                                        
+                                                                         <p id="total_sum">sum num</p>
+                                                                         
+                                                                         
+                                                                            <?php endif; ?>
+                                                                            
+                                                                            
+                                                                            
+                                                                            
                                                                     </div>
                                                             </td>
                                                 <?php endforeach; ?>
@@ -154,5 +218,4 @@ foreach ($day_names as $key => $value) {
 <div id="single-day-container">
  
   </div>
- </div></div>
- 
+  
