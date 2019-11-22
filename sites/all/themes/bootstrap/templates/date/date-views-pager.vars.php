@@ -17,6 +17,8 @@
  *
  * @ingroup theme_preprocess
  */
+ 
+
 function bootstrap_preprocess_date_views_pager(array &$variables) {
   $mini = !empty($variables['mini']);
 
@@ -51,23 +53,17 @@ function bootstrap_preprocess_date_views_pager(array &$variables) {
     $options = isset($variables[$type . '_options']) ? $variables[$type . '_options'] : array();
     $options += array('attributes' => array());
 
-    $url = $variables[$type . '_url'];
-    
-//    drupal_set_message('<pre>'. print_r($url, TRUE) .'</pre>');  
-//
+     $url = $variables[$type . '_url'];
     $url = explode('/',$url);
-    // drupal_set_message('<pre>'. print_r($url, TRUE) .'</pre>');  
     $url[4] = $url[8];
     unset($url[8]);
-    $new_url ='';
-    foreach ($url as $i_url){
-          
-         $new_url .= '/'.$i_url;
-     }
-     $url = substr($new_url, 1); 
-      // drupal_set_message('<pre>'. print_r($url, TRUE) .'</pre>');  
+     // unset($array2[2]);  
+          dpm($url);
+     $url = implode ( '/', $url );
+ 
+    dpm($url);
 
-    // Make the item disabled if there is no URL.
+ // Make the item disabled if there is no URL.
     if (!$url) {
       $url = '#';
       $item_classes[] = 'disabled';

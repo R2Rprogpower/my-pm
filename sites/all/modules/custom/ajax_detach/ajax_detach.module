@@ -71,9 +71,7 @@ function get_project_team_dom_id_ajax() {
       $commands[] = ajax_command_replace($selector, $my_view);    
       $commands[] = ajax_command_alert('$selector');
       print ajax_render($commands);
-
-
-  
+ 
   
 }
 

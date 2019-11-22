@@ -582,12 +582,8 @@ function user_add_to_project_form_submit($form, &$form_state) {
           ctools_include('modal');
           ctools_modal_add_js(); 
 
-          $nid =  $form_state['values']['nid'];
-          $my_view_name = 'project_team';
-          $my_display_name = 'block';
-          $view = views_get_view($my_view_name);
           $commands = array();
-          $commands[] = ajax_command_invoke(NULL, "reload_view"  );
+          $commands[] = ajax_command_invoke(NULL, "reload_view");
           $commands[] = ctools_modal_command_dismiss();
           return array(
             '#type' => 'ajax',

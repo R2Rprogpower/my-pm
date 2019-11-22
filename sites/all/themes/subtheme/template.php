@@ -28,8 +28,9 @@
      drupal_add_js(drupal_get_path('module', 'ajax_detach') . '/ajax_detach.js');
      drupal_add_js(drupal_get_path('module', 'control_user') . '/control_user.js');
      drupal_add_js(drupal_get_path('module', 'timesheets') . '/timesheets.js');
+   
 
-
+ 
      if (isset($vars['node']->type)) {
          drupal_set_message('<pre>'. print_r ($vars['node']->type, true) .'</pre>');  
 

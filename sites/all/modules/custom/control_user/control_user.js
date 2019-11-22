@@ -13,6 +13,7 @@
 
 
 		attach: function (context, settings) {
+                      
 			$.fn.reload_view = function () {
 				var success = false;
 				$("#add_to_team_custom").ready(function () {
@@ -52,7 +53,6 @@
 
 
 	}
-	Drupal.attachBehaviors(document, Drupal.settings);
-
+ 
 
 }(jQuery));

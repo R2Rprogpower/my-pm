@@ -11,6 +11,10 @@
 
     Drupal.behaviors.ajax_detach = {
         attach: function(context, settings) {
+            
+          
+                  
+                  
             $('.custom-class-node-title').find('a').attr('style', 'text-decoration: none; color: black;');
             $('a:contains("New ticket")').css('color', 'white');
             $('a:contains("Add a skill")').css('color', 'white');
@@ -214,6 +218,5 @@
     };
 
     
- Drupal.attachBehaviors(document, Drupal.settings);
-    
+     
 }(jQuery));

@@ -28,9 +28,10 @@
 //dsm($items);
 $index = 0;
 $header_ids = array();
-
 $start_date = date_format($view->date_info->min_date, 'U'); 
- //$node_1 = node_load(64); drupal_set_message('<pre>'. print_r($node_1, TRUE) .'</pre>');  
+    
+
+
 
 
 

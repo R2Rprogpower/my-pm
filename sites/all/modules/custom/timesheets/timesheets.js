@@ -4,94 +4,104 @@
  *@file
  *
  */
-       
-            (function ($) {
+
+(function ($) {
 
 
 	Drupal.behaviors.timesheets = {
 
 
 		attach: function (context, settings) {
+                   
+            
+            
+            
+            
+
+                       $.fn.style_timesheet = function (data) {
+                           var result = Object.keys(data).map(function(key) {
+                                return [Number(key), data[key]];
+                              });
+                                 console.log('data - ' + Object.values(data) + data);
+ 			};
                     
-//                   var buttons =  $('.timesheets-views').find('button');
-//                   buttons .each(function() {
-//                   var rowUrlData =  $(this).parent().parent().parent().parent().attr('id') ; 
-//                     console.log(rowUrlData);
-//                     var path = window.location.pathname;   
-//                     path = path.substr(1);
-//                     var newHrefData = rowUrlData.split('_');
-//                        
-//                        var ticketNid = newHrefData[0];
-//                         
-//                        var dateSplit = newHrefData[1].split('/');
-//                                      
-//                        var day = dateSplit[0];
-//                  
-//                        var month = dateSplit[1];
-//                        
-//                        var year = dateSplit[2];
-//                        
-//                        var date = day +'_'+ month +'_'+ year;
-//                        
-//                        var popupPathPart = 'ajax/nojs/' ;
-//                                                            // ticket and date
-//                        var url = path   +  popupPathPart + ticketNid + "/" + date;
-//                        
-//                        $(this).parent().attr('href',url);
-//                     
-//                     
-//                     });
-//                
-//                    
-//                    $('.timesheets-views').find('button').click(function(e) {
-//                         
-//                        
-//                         var path = window.location.pathname;
-//                         path = path.substring(1);
-////                         var parhSplit = path.split('/');
-////                         if (parhSplit[4].length -> 0) {
-////                             
-////                         }
-//                        
-//                        
-//                        
-//                        var rowUrlData =  $(this).parent().parent().parent().parent().attr('id') ; 
-//                        
-//                        var newHrefData = rowUrlData.split('_');
-//                        
-//                         var ticketNid = newHrefData[0];
-//                         
-//                        var dateSplit = newHrefData[1].split('/');
-//                                      
-//                        var day = dateSplit[0];
-//                  
-//                        var month = dateSplit[1];
-//                        
-//                        var year = dateSplit[2];
-//                        
-//                        var date = day +'_'+ month +'_'+ year;
-//                        
-//                        var popupPathPart = 'ajax/nojs/' 
-//                                                            // ticket and date
-//                        var url = path   +  popupPathPart + ticketNid + "/" + date;
-//                        
-//                             // $(this).parent().attr('href',url);
-//                      // if (jQuery.post(url, 0)) {
-//                         
-//                        console.log('Post rq is sent to '+ url);
-//
-//                    //   }    
-//                        
-//    
-//                        });
-
+                        $(document).ready(function () {
+                            
+                              
                     
-                 
-		}
+               $('#abra').find('.prev').find('a').click(function(e) {
+                //e.preventDefault();
+                console.log('prev');
+               //var myUrl = $(this).attr('href');
+
+//                if ( jQuery.post(myUrl, 0) ) {
+//                   // console.log('Post rq is sent to  '+myUrl);
+//                    $(this).parent().parent().hide();
+//                }
 
 
+
+            });
+                            
+               $('#abra').find('.next').find('a').click(function(e) {
+               // e.preventDefault();
+                console.log('next');
+               //var myUrl = $(this).attr('href');
+
+//                if ( jQuery.post(myUrl, 0) ) {
+//                   // console.log('Post rq is sent to  '+myUrl);
+//                    $(this).parent().parent().hide();
+//                }
+
+
+
+            });
+                    
+                            
+                            
+                            
+			var path = window.location.pathname;
+			//path = path.substr(1);
+			var pathSplit = path.split('/');
+			//console.log(pathSplit);
+			//    console.log(settings);
+
+			if (pathSplit[3] == 'timesheets') {
+				// console.log('success');
+				var url = path + '/ajax';
+                                console.log(url);
+
+
+				
+
+
+					$.ajax({
+						type: 'POST',
+						url: url,
+						dataType: 'html',
+						success: function (timesheetsInfoJson) {
+							// Set up new content.
+                                                       
+							var timesheetsInfo = JSON.parse(timesheetsInfoJson );
+                                                        var value=timesheetsInfo.length;
+
+							console.log(timesheetsInfo);
+                                                        
+                                                        
+                                                        
+                                                        
+                                                        
+                                                        
+						}
+					});
+				
+
+			}
+
+                        });
+                    }
+               
 	}
-	Drupal.attachBehaviors(document, Drupal.settings);
-
+ 
 
 }(jQuery));
