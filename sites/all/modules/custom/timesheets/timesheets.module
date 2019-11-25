@@ -18,7 +18,7 @@ function timesheets_menu() {
         'access callback' => TRUE, 
           'modal' => TRUE, // This line is where the magic happens.
     );
-    $items['user/%user/timesheets/week/%/ajax'] = array( //this creates a URL that will call this form at "examples/form-example"
+    $items['user/%user/timesheets/week/ajax'] = array( //this creates a URL that will call this form at "examples/form-example"
         'title' => 'load ts ', //page title
         'description' => 'load timesheets for timesheet page dispaly',
         'type' => MENU_CALLBACK,
@@ -29,8 +29,76 @@ function timesheets_menu() {
  
     );
     
+    $items['user/week/timesheets/veiw/ajax/%/%user'] = array( //this creates a URL that will call this form at "examples/form-example"
+        'title' => 'load ts ', //page title
+        'description' => 'load timesheets for timesheet page dispaly',
+        'type' => MENU_CALLBACK,
+        'page callback' => 'ajax_timesheets_page_get_new_date_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+                'access arguments' => array(
+            'access content'
+        ) , 
+ 
+    );
+    
+    
      return $items;
 }
+function ajax_timesheets_page_get_new_date_callback($ajax = 'ajax') {
+         //   setPath('user/28/timesheets/week/ajax');
+    
+    $url = 'user/' . arg(6) . '/timesheets/veiw/ajax/week/' . arg(5);
+    menu_set_active_item($url );
+    $timesheets_week = menu_execute_active_handler($url, FALSE);
+     
+         $return = array('html' => $timesheets_week);
+         echo $return = drupal_json_encode($return);
+                
+                
+                
+                
+}
+  
+  
+ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
+ 
+  
+         $week_num = arg(4);
+        $week_num = substr($week_num, 6);                
+            $timesheet_table_view_name = 'timesheets_info';
+            $timesheet_table_view_display = 'block';
+            if(!empty(arg(1))){
+                $uid = arg(1) ;
+                
+            }
+           // dpm($week_num);
+            // in fututre the uid shall be transported through the URL if the correct permissions are set
+            $timesheet_info_table = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week_num );
+                        
+
+
+    $timesheet_nodes = node_load_multiple(array(), array('type' => 'timesheet'));
+    $timesheets_info= array();
+    foreach ($timesheet_nodes as $index => $node) {
+        $timesheets_info[] = array(
+            'nid' => $index,
+            'ticket_ref' => $node->field_ticket_reference[LANGUAGE_NONE][0]['target_id'],
+            'date_created' => explode(' ',$node->field_date_created[LANGUAGE_NONE][0]['value'])[0],
+            'week_created' => $node->field_week_created[LANGUAGE_NONE][0]['value'],
+
+            'time_spent' => $node->field_time_spent[LANGUAGE_NONE][0]['value'],
+            'user_ref' => $node->field_user_reference[LANGUAGE_NONE][0]['uid']  ,
+            'comment' => (empty($body = $node->body[LANGUAGE_NONE][0]['value']) ) ? 'empty' : $body,
+         
+        );
+    }
+    $timesheets_info_json =   drupal_json_encode($timesheets_info);
+     drupal_json_output($timesheets_info);
+//    ;
+    // drupal_exit();
+ 
+}
+
+
  function ajax_modal_timesheets_forms_page_callback($js = NULL) {
     if ($js) {
  
@@ -54,12 +122,26 @@ function timesheets_menu() {
  
 
 function add_timesheet_form($form, &$form_state) {
+
+    
     $uid = arg(1);
     $ticket_nid = arg(6);
     $date = arg(7);
-     $field_date_created = str_replace('_', '-', $date);
-    $date = $field_date_created;
-     global $user;
+    $field_date_created = str_replace('_', '-', $date);
+    $date  = $field_date_created; 
+   // echo "Weeknummer: $week";
+    dpm('week created  ' . $date);
+    
+    
+//    dpm('date '. $date);
+//    $date_created_timestamp = strtotime($date); 
+//    dpm('date_created_timestamp ' . $date_created_timestamp);
+//    $week_created = date_format('W', $date_created_timestamp);
+//    dpm('week created  ' . $week_created);
+    
+    
+    
+    global $user;
     $current_roles = $user->roles;
     $access_value = get_access_admin_value($current_roles);
     $form = array();
@@ -204,67 +286,32 @@ function add_timesheet_form_submit($form, &$form_state) {
 
 
 
-function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
-    
-    
-     
- //$week_num = substr($week_num, 6);
-         $week_num = arg(4);
-        $week_num = substr($week_num, 6);                
-            $timesheet_table_view_name = 'timesheets_info';
-            $timesheet_table_view_display = 'block';
-            if(!empty(arg(1))){
-                $uid = arg(1) ;
-                
-            }
-           // dpm($week_num);
-            // in fututre the uid shall be transported through the URL if the correct permissions are set
-            $timesheet_info_table = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week_num );
-                        
-               foreach($timesheet_info_table as $timesheet)   {
-                   dpm($timesheet->node_title );
-               }   
-          
-            
 
-    $timesheet_nodes = node_load_multiple(array(), array('type' => 'timesheet'));
-    $timesheets_info= array();
-    foreach ($timesheet_nodes as $index => $node) {
-        $timesheets_info[] = array(
-            'nid' => $index,
-            'ticket_ref' => $node->field_ticket_reference[LANGUAGE_NONE][0]['target_id'],
-            'date_created' => explode(' ',$node->field_date_created[LANGUAGE_NONE][0]['value'])[0],
-            'week_created' => $node->field_week_created[LANGUAGE_NONE][0]['value'],
-
-            'time_spent' => $node->field_time_spent[LANGUAGE_NONE][0]['value'],
-            'user_ref' => $node->field_user_reference[LANGUAGE_NONE][0]['uid'] ,
-            'comment' => (empty($body = $node->body[LANGUAGE_NONE][0]['value']) ) ? 'empty' : $body,
-
-        );
-    }
-  echo drupal_json_encode($timesheets_info);
-    
-    // drupal_exit();
- 
-}
 
 
 
 function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment) {
   
     global $user; 
-    $date_created_timestamp = strtotime($date);    
-    $week_created = date('W', $date_created_timestamp);
+  
+      
+   
+    $date_arr = explode('-', $date);
+     $date_arr[2] = '20' .  $date_arr[2];
+     $field_date_created = implode('-', $date_arr);
      
-    $date_field = array(
-        'value' => $date,
-        'timezone' => 'Europe/Helsinki',
-        'timezone_db' => 'Europe/Helsinki',
-        'date_type' => 'date',
-    );
+     
+     $ddate = new DateTime($date);
+    $week_created = $ddate->format("W");
     
- 
+    
+    $date_field = array(
+          'value' => $date,
 
+
+      );
+    
+   dsm($date_field);
   $node = new stdClass();
   $node->title = "user's " . $user_uid . " Timesheet for ticket " . $ticket_nid . ' and date ' . $date;
   $node->type = "timesheet";

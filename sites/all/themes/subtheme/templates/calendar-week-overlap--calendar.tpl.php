@@ -43,7 +43,11 @@ foreach ($day_names as $key => $value) {
  // drupal_set_message('<pre>'. print_r($ticket_table, TRUE) .'</pre>');  
 
 ?>
-
+<script>
+          
+                                    
+                                    
+    </script>
     <div style="margin-bottom: 50px;"  class="calendar-calendar">
         <div class="week-view">
             <table class="full">
@@ -162,7 +166,6 @@ foreach ($day_names as $key => $value) {
                                                                           
                                                                           $new_href_data = explode ('_', $cell_id); 
                                                                           $ticket_nid = $new_href_data[0];
-                                                                          
                                                                           $date_explode = explode('/',$new_href_data[1]);
                                                                                     
                                                                           $day  = $date_explode[0];
@@ -170,10 +173,8 @@ foreach ($day_names as $key => $value) {
                                                                           $year  = $date_explode[2];
                                                                           $date = "/" .$day . '_' . $month . '_' . $year;
                                                                           $path =  '/user/' . arg(1) . '/timesheets/week';
-                                                                           $modal_part = '/ajax/nojs/';
-                                                                          
-                                                                          
-                                                                            $url = $path .  $modal_part . $ticket_nid .  $date; 
+                                                                          $modal_part = '/ajax/nojs/';
+                                                                          $url = $path .  $modal_part . $ticket_nid .  $date; 
                                                                           
                                                                               $dest = $url;
                                                                               
@@ -220,3 +221,56 @@ foreach ($day_names as $key => $value) {
  
   </div>
   
+<script> 
+    
+(function ($) {
+
+
+	Drupal.behaviors.timesheets1 = {
+
+
+		attach: function (context, settings) {
+                   
+    
+                                         $('#abra').find('a').click(function(e) {
+                                                e.preventDefault();
+                                                
+                                                var rowLink = $(this).attr('href').split('/');
+                                                       //console.log(rowLink);   // http://pm.local:10080/user/week/timesheets/veiw/ajax/2019-W49/28
+                                                                      
+
+                                         var url2 = '/user/week/timesheets/veiw/ajax/'  + rowLink[8] + '/' + rowLink[9];
+                                         var url2 = $(this).attr('href');
+                                          console.log(url2);
+                                         
+
+                                             $.ajax({
+						type: 'POST',
+						url: url2 ,
+						dataType: 'html',
+						success: function (timesheetsInfoJson) {
+							// Set up new content.
+                                                        
+							var timesheetsInfo = JSON.parse(timesheetsInfoJson );
+ 
+							//console.log(timesheetsInfo.html);
+                                                        var timesheetsViewsIdSelector = $('.view-id-timesheets').attr('class').split(' ')[4];
+                                                            timesheetsViewsIdSelector =  '.' + timesheetsViewsIdSelector;
+                                                        if( $(timesheetsViewsIdSelector).replaceWith(timesheetsInfo.html)) {
+                                                              
+                                                        };
+
+                                                        
+                                                        
+						}
+					});
+
+
+
+                                        });
+                                    }
+                                }
+                                          Drupal.attachBehaviors(document, Drupal.settings);
+
+                                        }(jQuery));
+    </script>

@@ -58,10 +58,10 @@ function bootstrap_preprocess_date_views_pager(array &$variables) {
     $url[4] = $url[8];
     unset($url[8]);
      // unset($array2[2]);  
-          dpm($url);
+          
      $url = implode ( '/', $url );
  
-    dpm($url);
+   
 
  // Make the item disabled if there is no URL.
     if (!$url) {
