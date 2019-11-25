@@ -300,7 +300,7 @@ function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $com
      $date_arr[2] = '20' .  $date_arr[2];
      $field_date_created = implode('-', $date_arr);
      
-     
+     $date = $field_date_created;
      $ddate = new DateTime($date);
     $week_created = $ddate->format("W");
     
