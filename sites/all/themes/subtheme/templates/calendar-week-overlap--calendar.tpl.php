@@ -31,11 +31,7 @@ $header_ids = array();
 $start_date = date_format($view->date_info->min_date, 'U'); 
     
 
-
-
-
-
-
+                        
 foreach ($day_names as $key => $value) {
   $header_ids[$key] = $value['header_id'];
 }
@@ -60,9 +56,9 @@ foreach ($day_names as $key => $value) {
                             <?php endif;?>
 
                                 <?php $i = 0; foreach ($day_names as $cell): ?>
-                                    <th class="<?php print $cell['class']; ?>" id="<?php print $date =  date('d/m', strtotime("+$i day", $start_date));  ?>">
+                                    <th class="<?php print $cell['class']; ?>" id="<?php  print "" . $date =  date('d/m/Y', strtotime("+$i day", $start_date));  ?>">
                                        <!-- <?php  print $cell['data']; ?>, -->
-                                            <?php print $date ?>
+                                            <?php print $date =  date('d/m', strtotime("+$i day", $start_date));  ?>
                                          <?php  $dates[] = $date = date('d/m/y', strtotime("+$i day", $start_date)); $i++; ?>
                                     </th>
                                     <?php endforeach; ?>
@@ -147,7 +143,8 @@ foreach ($day_names as $key => $value) {
                                                     <?php $colpos = (isset($title['values'][$column][0])) ? $title['values'][$column][0]['wday'] : $index; ?>
                                                         <?php $curpos = $colpos + 1;?>
                                              
-                                                            <td id ="<?php print $cell_id =   ( $prenid[0] == 'total') ?  $prenid[0] . '_' . $prenid[1] . '_' . $dates[$index] :  $prenid[1] . '_' . $dates[$index] ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+                                                            <td id ="<?php print 'cell_' . $cell_id =   ( $prenid[0] == 'total') ?  $prenid[0] . '_' . $prenid[1] . '_' . $dates[$index] :  $prenid[1] . '_' . $dates[$index] ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
+                                                                
 
                                                                 
                                                                 
@@ -200,7 +197,7 @@ foreach ($day_names as $key => $value) {
                                                                             
                                                                              <?php if( $prenid[0] == 'total') :?>
                                                                         
-                                                                         <p id="total_sum">sum num</p>
+                                                                         <p id="total_sum">0</p>
                                                                          
                                                                          
                                                                             <?php endif; ?>
@@ -241,12 +238,15 @@ foreach ($day_names as $key => $value) {
 
                                          var url2 = '/user/week/timesheets/veiw/ajax/'  + rowLink[8] + '/' + rowLink[9];
                                          var url2 = $(this).attr('href');
-                                          console.log(url2);
+                                         var date = $('th.mon').attr('id');   
+                                         var data = {"date" : date}
+                                          //console.log(url2);
                                          
 
                                              $.ajax({
 						type: 'POST',
 						url: url2 ,
+                                                data: data,
 						dataType: 'html',
 						success: function (timesheetsInfoJson) {
 							// Set up new content.

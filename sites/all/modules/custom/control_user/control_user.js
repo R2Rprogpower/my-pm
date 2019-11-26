@@ -16,7 +16,7 @@
                       
 			$.fn.reload_view = function () {
 				var success = false;
-				$("#add_to_team_custom").ready(function () {
+				$("#add_to_team_custom").ready(function () { 
 
 					$(this).ajaxComplete(function (event, request, settings) {
 						$.each(Drupal.views.instances, function (i, view) {
