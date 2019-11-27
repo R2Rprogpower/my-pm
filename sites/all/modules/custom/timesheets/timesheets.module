@@ -1,6 +1,4 @@
 <?php
- 
-
 /**
 *@file
 * Helps devs to study.
@@ -9,388 +7,345 @@
  * Implements hook_form_alter().
 */
 function timesheets_menu() {
-    $items = array (); 
-    
-    $items['user/%user/timesheets/week/ajax/%ctools_js/%/%'] = array(
-        'title' => 'add Timesheet',
-        'page callback' => 'ajax_modal_timesheets_forms_page_callback',
-        'page arguments' => array(5),
-        'access callback' => TRUE, 
-          'modal' => TRUE, // This line is where the magic happens.
+  $items = array (); 
+  $items['user/%user/timesheets/week/ajax/%ctools_js/%/%'] = array(
+    'title' => 'add Timesheet',
+    'page callback' => 'ajax_modal_timesheets_forms_page_callback',
+    'page arguments' => array(5),
+    'access callback' => TRUE, 
+    'modal' => TRUE, // This line is where the magic happens.
     );
     $items['user/%user/timesheets/week/ajax'] = array( //this creates a URL that will call this form at "examples/form-example"
-        'title' => 'load ts ', //page title
-        'description' => 'load timesheets for timesheet page dispaly',
-        'type' => MENU_CALLBACK,
-        'page callback' => 'ajax_timesheets_page_get_timesheets_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
-                'access arguments' => array(
-            'access content'
-        ) , 
- 
+      'title' => 'load ts ', //page title
+      'description' => 'load timesheets for timesheet page dispaly',
+      'type' => MENU_CALLBACK,
+      'page callback' => 'ajax_timesheets_page_get_timesheets_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+      'access arguments' => array(
+      'access content'
+      ) , 
     );
-    
     $items['user/week/timesheets/veiw/ajax/%/%user'] = array( //this creates a URL that will call this form at "examples/form-example"
-        'title' => 'load ts ', //page title
-        'description' => 'load timesheets for timesheet page dispaly',
-        'type' => MENU_CALLBACK,
-        'page callback' => 'ajax_timesheets_page_get_new_date_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
-                'access arguments' => array(
-            'access content'
+      'title' => 'load ts ', //page title
+      'description' => 'load timesheets for timesheet page dispaly',
+      'type' => MENU_CALLBACK,
+      'page callback' => 'ajax_timesheets_page_get_new_date_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+      'access arguments' => array(
+        'access content'
         ) , 
- 
     );
-    
-    
-     return $items;
+  return $items;
 }
 function ajax_timesheets_page_get_new_date_callback($ajax = 'ajax') {
-         //   setPath('user/28/timesheets/week/ajax');
-      /// dsm($_POST['date'] );
-       
-       
-        $url = 'user/' . arg(6) . '/timesheets/veiw/ajax/week/' . arg(5);
-        menu_set_active_item($url );
-        $timesheets_week = menu_execute_active_handler($url, FALSE);
-     
-         $return = array('html' => $timesheets_week);
-         echo $return = drupal_json_encode($return);
-                
-                
-                
-               
+  $url = 'user/' . arg(6) . '/timesheets/veiw/ajax/week/' . arg(5);
+  menu_set_active_item($url );
+  $timesheets_week = menu_execute_active_handler($url, FALSE);
+  $return = array('html' => $timesheets_week);
+  echo $return = drupal_json_encode($return);
 }
-  
-  
- function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
-           
-  
-                        
-            $timesheet_table_view_name = 'timesheets_info';
-            $timesheet_table_view_display = 'block';
-            if(!empty(arg(1))){
-                $uid = arg(1) ;
-                
-            }    
-                 $date = $_POST['date1'] ;
-                 $week_date_obj = new DateTime($date);
-                 $week  = $week_date_obj->format("W");
-                 //     dpm($week );
-            
-              $timesheet_info_table = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week);
-       
- 
-         $timesheets_info = array();
-        foreach ($timesheet_info_table as $index => $node) {
-//             dpm($node->field_field_project[0]['raw']['nid']);
-//             drupal_exit();
-             $timesheets_info[] = array(
-                'nid' => $node->nid,
-                'ticket_ref' => $node->field_field_ticket_reference[0]['raw']['target_id'],
-                'date_created' => $node->field_field_date_created[0]['raw']['value'],
-                'week_created' => $node->field_field_week_created[0]['raw']['value'],
-
-                'time_spent' => $node->field_field_time_spent[0]['raw']['value'],
-                'user_ref' => $node->field_field_user_reference[0]['raw']['uid']  ,
-                'comment' => (empty($body = $node->field_body[0]['raw']['value']) ) ? 'empty' : $body,
-                'project' => $node->field_field_project[0]['raw']['nid'],
-
-            );
-       }
-   
-          //
-          // 
-          //   dsm('$timesheet_info_table_prev');
-           
-        $timesheet_info_table_prev = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week-1);
-           if(!empty($timesheet_info_table_prev)) {
-        foreach ($timesheet_info_table_prev as $index => $node) {
-               $timesheets_info_prev[] = array(
-         
-                     'nid' => $node->nid,
-                     'ticket_ref' => $node->field_field_ticket_reference[0]['raw']['target_id'],
-                     'date_created' => $node->field_field_date_created[0]['raw']['value'],
-                     'week_created' => $node->field_field_week_created[0]['raw']['value'],
-
-                     'time_spent' => $node->field_field_time_spent[0]['raw']['value'],
-                     'user_ref' => $node->field_field_user_reference[0]['raw']['uid']  ,
-                     'comment' => (empty($body = $node->field_body[0]['raw']['value']) ) ? 'empty' : $body,
-                     'project' => $node->field_field_project[0]['raw']['nid'],
-
-                 );
-
+function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
+  $timesheet_table_view_name = 'timesheets_info';
+  $timesheet_table_view_display = 'block';
+  if(!empty(arg(1))){
+    $uid = arg(1) ;
+  }    
+  $date = $_POST['date1'] ;
+  $week_date_obj = new DateTime($date);
+  $week  = $week_date_obj->format("W");
+  $timesheet_info_table = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week);
+  $timesheets_info = array();
+  foreach ($timesheet_info_table as $index => $node) {
+    $timesheets_info[] = array(
+    'nid' => $node->nid,
+    'ticket_ref' => $node->field_field_ticket_reference[0]['raw']['target_id'],
+    'date_created' => $node->field_field_date_created[0]['raw']['value'],
+    'week_created' => $node->field_field_week_created[0]['raw']['value'],
+    'time_spent' => $node->field_field_time_spent[0]['raw']['value'],
+    'user_ref' => $node->field_field_user_reference[0]['raw']['uid']  ,
+    'comment' => (empty($body = $node->field_body[0]['raw']['value']) ) ? 'empty' : $body,
+    'project' => $node->field_field_project[0]['raw']['nid'],
+    );
+  }       
+  $timesheet_info_table_prev = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week-1);
+  if(!empty($timesheet_info_table_prev)) {
+    foreach ($timesheet_info_table_prev as $index => $node) {
+      $timesheets_info_prev[] = array(
+      'nid' => $node->nid,
+      'ticket_ref' => $node->field_field_ticket_reference[0]['raw']['target_id'],
+      'date_created' => $node->field_field_date_created[0]['raw']['value'],
+      'week_created' => $node->field_field_week_created[0]['raw']['value'],
+      'time_spent' => $node->field_field_time_spent[0]['raw']['value'],
+      'user_ref' => $node->field_field_user_reference[0]['raw']['uid']  ,
+      'comment' => (empty($body = $node->field_body[0]['raw']['value']) ) ? 'empty' : $body,
+      'project' => $node->field_field_project[0]['raw']['nid'],
+      );
     }
     $timesheets_info = array_merge($timesheets_info,$timesheets_info_prev);
-          }
-    $timesheets_info_json =   drupal_json_encode($timesheets_info);
-     drupal_json_output($timesheets_info);
-//    ;
-    // drupal_exit();
- 
+  }
+$timesheets_info_json = drupal_json_encode($timesheets_info);
+drupal_json_output($timesheets_info);
 }
-
-
- function ajax_modal_timesheets_forms_page_callback($js = NULL) {
-    if ($js) {
- 
+function ajax_modal_timesheets_forms_page_callback($js = NULL) {
+  if ($js) {
     ctools_include('ajax');
     ctools_include('modal');
-  
     $form_state = array(
       'ajax' => TRUE,
       'title' => 'Add a timesheet',
-        'arg' => arg(7)
+      'arg' => arg(7)
     );
-     $commands = ctools_modal_form_wrapper('add_timesheet_form', $form_state);
-    
+    $commands = ctools_modal_form_wrapper('add_timesheet_form', $form_state);
     print ajax_render($commands);
-    }
-    else {
-    return drupal_get_form('add_timesheet_form');
-    }
+  }else {
+     return drupal_get_form('add_timesheet_form');
+   }
 }
-
- 
-
+function _check_if_timesheet_exists($ticket_nid, $date){
+  $query_get_timesheet_nids_by_date = "SELECT entity_id FROM {field_data_field_date_created} WHERE field_date_created_value = :date";
+  $args_get_timesheet_nids_by_date = array(
+    ':date' => $date,
+  );
+  $query_get_timesheet_nids_by_ticket_nid= "SELECT entity_id FROM {field_data_field_ticket_reference} WHERE field_ticket_reference_target_id = :ticket_nid";
+  $args_get_timesheet_nids_by_ticket_nid = array(
+    ':ticket_nid' => $ticket_nid,
+  );
+  $result_by_date = db_query($query_get_timesheet_nids_by_date, $args_get_timesheet_nids_by_date);
+   $arr_by_date =[] ; 
+  foreach ($result_by_date as $field_name => $value) {
+     $arr_by_date[$field_name] = $value->entity_id;
+  }
+  $result_by_ticket_nid  = db_query($query_get_timesheet_nids_by_ticket_nid , $args_get_timesheet_nids_by_ticket_nid );
+  $arr_by_ticket_nid = [] ; 
+  foreach ($result_by_ticket_nid as $field_name => $value) {
+    $arr_by_ticket_nid[$field_name] = $value->entity_id;
+  }
+  $arrs_intersected = array_intersect( $arr_by_ticket_nid , $arr_by_date);
+  $nid = $arrs_intersected[array_keys($arrs_intersected)[0]] ;
+  if(!empty($nid)) {
+    return $nid;
+  }
+  return 0;
+}
 function add_timesheet_form($form, &$form_state) {
-
-    
-    $uid = arg(1);
-    $ticket_nid = arg(6);
-    $date = arg(7);
-    $field_date_created = str_replace('_', '-', $date);
-    $date  = $field_date_created; 
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-   // echo "Weeknummer: $week";
-  //  dpm('week created  ' . $date);
-    
-    
-//    dpm('date '. $date);
-//    $date_created_timestamp = strtotime($date); 
-//    dpm('date_created_timestamp ' . $date_created_timestamp);
-//    $week_created = date_format('W', $date_created_timestamp);
-//    dpm('week created  ' . $week_created);
-    
-    
-    
-    global $user;
-    $current_roles = $user->roles;
-    $access_value = get_access_admin_value($current_roles);
-    $form = array();
-    $hours =array(1,2,3,4,5,6,7,8,9,10,11,12);
-    if ($access_value > 0) {
-             // creating menu fields
-        
-        
-  
-         
-         
-            $form['hours'] = array(
-                '#type' => 'textfield',
-                '#title' => t('Spent hours') ,
-                
-             
-                '#description' => t('Choose the user that you want to be added to the team.'),
-//                '#ajax' => array(
-//                   'callback' => 'ajax_form_add_timesheet_hours',
-//                    'wrapper' => 'ajax_form_message_wrapper',
-//                    ),
-
-                );
-            
-            
-            $form['body'] = array(
-                '#type' => 'textfield',
-                '#title' => t('Comment') ,
-                '#attributes' => array('placeholder' => t('Your comment should go here!') ),
-                '#description' => t('hidden field for submit function'),
-                '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
- 
-                );
-         
-           
-            
-                    
-            $form['ticket_nid'] = array(
-                  '#type' => 'hidden',
-                '#title' => t('Ticket\'s nid') ,
-                '#value' => $ticket_nid,
-                '#description' => t('hiiden field for submit function'),
-                
-                );
-           
-             $form['date'] = array(
-                 '#type' => 'hidden',
-                '#title' => t('Date') ,
-                '#value' => $date,
-                '#description' => t('hidden field for submit function'),
-                
-                );
-             
-              $form['user'] = array(
-               '#type' => 'hidden',
-                '#title' => t('User\'s uid') ,
-                '#value' => $uid,
-                '#description' => t('hidden field for submit function'),
-                
-                );
-              $form['submit']['#submit'][] = 'add_timesheet_form_submit';
-            $form['#attributes'] = array('class' => 'add_timesheet_custom');
-            // adding the button
-            $form['submit'] = array(
-                '#type' => 'submit',
-     
-                '#value' => t('Add a timesheet'),
-                '#prefix' => '<div class="add_to_team_custom" id="add_to_team_custom">',
-                '#suffix' => '</div>',
-                '#ajax' => array(
-                  'callback' => 'ajax_form_add_timesheet_form_submit',
-                  'event' => 'click',
-                    ),
-                   );
-     
-     
-          
-
-       
-       
-    }
-    else {
-         $message3 = t('Only Project Managers and Admins can');
-        $form['textfield3'] = array(
-            '#type' => 'textfield',
-            '#size' => 34,
-            '#value' => $message3,
-            '#attributes' => array(
-                'readonly' => 'readonly'
-            ) ,
-        );
-       
-       
-    }
-     
-    return $form;
+  $uid = arg(1);
+  $ticket_nid = arg(6);
+  $date = arg(7);
+  $field_date_created = str_replace('_', '-', $date);
+  $date  = $field_date_created; 
+  global $user;
+  $current_roles = $user->roles;
+  $access_value = get_access_admin_value($current_roles);
+  $form = array();
+  $hours =array(1,2,3,4,5,6,7,8,9,10,11,12);
+  if ($access_value > 0 || $user->uid == $uid ) {
+    $timesheet_exists =  _check_if_timesheet_exists($ticket_nid, $date);
+    if ($timesheet_exists !== 0 ){
+      $node = node_load($timesheet_exists);
+      $form['timesheet_exists'] = array(
+       '#type' => 'hidden',
+       '#title' => t('Date') ,
+       '#value' => $timesheet_exists,
+       '#description' => t('hidden field for submit function'),
+      );
+      $existing_hours = $node->field_time_spent['und'][0]['value'];
+      $existing_comment = $node->body['und'][0]['value'];
+      $form['hours_exist'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Spent hours') ,
+        '#default_value' => $existing_hours, 
+        '#description' => t('Choose the user that you want to be added to the team.'),
+      );
+      $form['body_exist'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Comment') ,
+        '#default_value' => $existing_comment, 
+        '#attributes' => array('placeholder' => t('Your comment should go here!')),
+        '#description' => t('hidden field for submit function'),
+        '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
+      );
+      $form['ticket_nid'] = array(
+        '#type' => 'hidden',
+        '#title' => t('Ticket\'s nid') ,
+        '#value' => $ticket_nid,
+        '#description' => t('hiiden field for submit function'),
+      );
+      $form['date'] = array(
+        '#type' => 'hidden',
+        '#title' => t('Date') ,
+        '#value' => $date,
+        '#description' => t('hidden field for submit function'),
+       );
+       $form['user'] = array(
+         '#type' => 'hidden',
+         '#title' => t('User\'s uid') ,
+         '#value' => $uid,
+         '#description' => t('hidden field for submit function'),
+       );
+       $form['node'] = array(
+         '#type' => 'hidden',
+         '#title' => t('User\'s uid'),
+         '#value' => $node,
+         '#description' => t('hidden field for submit function'),
+       );
+       $form['submit']['#submit'][] = 'add_timesheet_form_submit';
+       $form['#attributes'] = array('class' => 'add_timesheet_custom');
+       $form['submit'] = array(
+         '#type' => 'submit',
+         '#value' => t('Add a timesheet'),
+         '#prefix' => '<div class="add_to_team_custom" id="add_to_team_custom">',
+         '#suffix' => '</div>',
+         '#ajax' => array(
+           'callback' => 'ajax_form_add_timesheet_form_submit',
+           'event' => 'click',
+           'wrapper' => 'ajax_form_message_wrapper',
+          ),
+       );
+    }else {   
+      $form['hours'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Spent hours') ,
+        '#description' => t('Choose the user that you want to be added to the team.'),
+      );
+      $form['body'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Comment') ,
+        '#attributes' => array('placeholder' => t('Your comment should go here!') ),
+        '#description' => t('hidden field for submit function'),
+        '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
+      );
+      $form['ticket_nid'] = array(
+        '#type' => 'hidden',
+        '#title' => t('Ticket\'s nid') ,
+        '#value' => $ticket_nid,
+        '#description' => t('hiiden field for submit function'),
+      );
+      $form['date'] = array(
+        '#type' => 'hidden',
+        '#title' => t('Date') ,
+        '#value' => $date,
+        '#description' => t('hidden field for submit function'),
+      );
+      $form['user'] = array(
+        '#type' => 'hidden',
+        '#title' => t('User\'s uid') ,
+        '#value' => $uid,
+        '#description' => t('hidden field for submit function'),
+      );
+      $form['submit']['#submit'][] = 'add_timesheet_form_submit';
+      $form['#attributes'] = array('class' => 'add_timesheet_custom');
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add a timesheet'),
+        '#prefix' => '<div class="add_to_team_custom" id="add_to_team_custom">',
+        '#suffix' => '</div>',
+        '#ajax' => array(
+          'callback' => 'ajax_form_add_timesheet_form_submit',
+          'event' => 'click',
+          'wrapper' => 'ajax_form_message_wrapper',
+        ),
+      );
+    }    
+  }else {
+    $message3 = t('Only Project Managers and Admins can');
+    $form['textfield3'] = array(
+      '#type' => 'textfield',
+      '#size' => 34,
+      '#value' => $message3,
+      '#attributes' => array(
+      'readonly' => 'readonly'
+      ) ,
+    );
+  }
+  return $form;
 }
 function add_timesheet_form_validate($form, &$form_state) {
-  
-  // Validation logic - invalidate using form_set_error() or form_error()
-
+  $timesheet_exists = $form_state['values']['timesheet_exists'];
+  $validated = 1;
+  if (!empty($timesheet_exists)) {
+    if($form_state['values']['hours_exist'] == 0 || empty($form_state['values']['hours_exist'])) {
+      form_set_error('hours_exist', t('You cannot leave the field empty :) '));
+      $validated = 0;
+    }elseif( $form_state['values']['hours_exist'] >= 16) { 
+      form_set_error('hours_exist', t('YOU MUST SLEEP :)'));
+      $validated = 0;
+    } 
+  }else {
+    if($form_state['values']['hours'] == 0 || empty($form_state['values']['hours'])) {
+      form_set_error('hours', t('You cannot leave the field empty :)'));
+      $validated = 0;
+    }elseif( $form_state['values']['hours'] >= 16) {
+      form_set_error('hours', t('YOU MUST SLEEP :) '));
+      $validated = 0;
+    } 
+  }  
+  $form_state['values']['validated']  = $validated;    
 }
 function add_timesheet_form_submit($form, &$form_state) {
- 
- $hours_spent = $form_state['values']['hours']+1;
- $ticket_nid = $form_state['values']['ticket_nid']; 
- $user_uid = $form_state['values']['user'];
- $date = $form_state['values']['date'];    
- $comment = $form_state['values']['body'];    
-
-  $new_timesheet = _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment);
-  $form_state['data']['data']  = array('hours' => $hours_spent, 'ticketNid' => $ticket_nid, 'date' => $date, 'happiness' => 'working function');
-
-  
-  //drupal_set_message('<pre>'. print_r($date, true) .'</pre>');  
-
+  $hours_spent = $form_state['values']['hours_exist'];
+  $ticket_nid = $form_state['values']['ticket_nid']; 
+  $user_uid = $form_state['values']['user'];
+  $date = $form_state['values']['date'];    
+  $comment = $form_state['values']['body_exist'];   
+  $node = $form_state['values']['node']; 
+  if( !empty($node) ){
+    $timesheet = _update_timesheet($node, $comment, $hours_spent, $node);
+  }else {
+    $comment = $form_state['values']['body'];    
+    $hours_spent = $form_state['values']['hours'];
+    $new_timesheet = _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment);
+  }
 }
-     
- function ajax_form_add_timesheet_hours($form, &$form_state){
-     
-         $a = '<div id="ajax_form_message_wrapper">'. $form_state['values']['hours'] .'</div>' ;
-        return $a; 
-          //return 'ASD'; 
-
-          
- }
- function ajax_form_add_timesheet_form_submit($form, &$form_state ) {
-          ctools_include('ajax');
-          ctools_include('modal');
-          ctools_modal_add_js(); 
-          
-          $as = $form_state['data']['data'];
-          $commands = array();
-         // $commands[] = ajax_command_invoke(NULL, "style_timesheet", array($as) );
-          $commands[] = ctools_modal_command_dismiss();
-          return array(
-            '#type' => 'ajax',
-            '#commands' => $commands,
-          );
-
+function ajax_form_add_timesheet_form_submit($form, &$form_state ) {
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js(); 
+  $commands = array();
+  $validated = $form_state['values']['validated'];  
+  if (!$validated){
+    $a = '<div id="ajax_form_message_wrapper"></div>' ;
+    return $a; 
+  }
+  $commands[] = ctools_modal_command_dismiss();
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
-
-
-
-
-
-
-
+function _update_timesheet($node, $comment, $hours_spent) {
+  $node->body['und'][0]['value'] = $comment;
+  $node->field_time_spent['und'][0]['value'] = $hours_spent;
+  node_save($node);
+}
 function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment) {
-  
-    global $user; 
-  
-     $date_arr = explode('-', $date);
-     $date_arr[2] = '20' .  $date_arr[2];
-     $field_date_created = implode('-', $date_arr);
- 
-     $week_date = $field_date_created;
-    
-     $week_date_obj = new DateTime($week_date);
-     $week_created = $week_date_obj->format("W");
-   
-    
-    
-    
-    $date_field = array(
-          'value' => $date,
-
-
-      );
-    
-   $node = new stdClass();
+  global $user; 
+  $date_arr = explode('-', $date);
+  $date_arr[2] = '20' .  $date_arr[2];
+  $field_date_created = implode('-', $date_arr);
+  $week_date = $field_date_created;
+  $week_date_obj = new DateTime($week_date);
+  $week_created = $week_date_obj->format("W");
+  $date_field = array(
+    'value' => $date,
+  );
+  $node = new stdClass();
   $node->title = "user's " . $user_uid . " Timesheet for ticket " . $ticket_nid . ' and date ' . $date;
   $node->type = "timesheet";
-  // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
   node_object_prepare($node); 
-  // Or e.g. 'en' if locale is enabled.
   $node->language = LANGUAGE_NONE; 
   $node->uid = $user->uid; 
-  // Status is 1 or 0; published or not.
   $node->status = 1; 
-  // Promote is 1 or 0; promoted to front page or not.
   $node->promote = 0; 
-  // Comment is 0, 1, 2; 0 = disabled, 1 = read only, or 2 = read/write.
   $node->comment = 0; 
-
-  // Text field
   $node->field_time_spent[$node->language][]['value'] = $hours_spent;
   $node->body[$node->language][]['value'] = (empty($comment) ) ? 'empty' : $comment;
-
-   // Entity reference field.
   $node->field_ticket_reference[$node->language][] = array(
     'target_id' => $ticket_nid,
     'target_type' => 'node',
   );
   $node->field_user_reference[$node->language][0]['uid'] = $user_uid;
-  // date field
   $node->field_date_created[$node->language][0] = $date_field;
-
-   $node->field_week_created[$node->language][0]['value'] = $week_created;
-
-
+  $node->field_week_created[$node->language][0]['value'] = $week_created;
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 }
-
-
-
 
 
