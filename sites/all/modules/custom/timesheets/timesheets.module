@@ -7,7 +7,7 @@
  * Implements hook_form_alter().
 */
 function timesheets_menu() {
-  $items = array (); 
+  $items = array(); 
   $items['user/%user/timesheets/week/ajax/%ctools_js/%/%'] = array(
     'title' => 'add Timesheet',
     'page callback' => 'ajax_modal_timesheets_forms_page_callback',
@@ -45,7 +45,7 @@ function ajax_timesheets_page_get_new_date_callback($ajax = 'ajax') {
 function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
   $timesheet_table_view_name = 'timesheets_info';
   $timesheet_table_view_display = 'block';
-  if(!empty(arg(1))){
+  if (!empty(arg(1))) {
     $uid = arg(1) ;
   }    
   $date = $_POST['date1'] ;
@@ -66,7 +66,7 @@ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
     );
   }       
   $timesheet_info_table_prev = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week-1);
-  if(!empty($timesheet_info_table_prev)) {
+  if (!empty($timesheet_info_table_prev)) {
     foreach ($timesheet_info_table_prev as $index => $node) {
       $timesheets_info_prev[] = array(
       'nid' => $node->nid,
@@ -79,10 +79,10 @@ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
       'project' => $node->field_field_project[0]['raw']['nid'],
       );
     }
-    $timesheets_info = array_merge($timesheets_info,$timesheets_info_prev);
+    $timesheets_info = array_merge($timesheets_info, $timesheets_info_prev);
   }
-$timesheets_info_json = drupal_json_encode($timesheets_info);
-drupal_json_output($timesheets_info);
+  $timesheets_info_json = drupal_json_encode($timesheets_info);
+  drupal_json_output($timesheets_info);
 }
 function ajax_modal_timesheets_forms_page_callback($js = NULL) {
   if ($js) {
@@ -95,11 +95,12 @@ function ajax_modal_timesheets_forms_page_callback($js = NULL) {
     );
     $commands = ctools_modal_form_wrapper('add_timesheet_form', $form_state);
     print ajax_render($commands);
-  }else {
-     return drupal_get_form('add_timesheet_form');
-   }
-}
-function _check_if_timesheet_exists($ticket_nid, $date){
+  }
+  else {
+    return drupal_get_form('add_timesheet_form');
+  }
+}  
+function _check_if_timesheet_exists($ticket_nid, $date) {
   $query_get_timesheet_nids_by_date = "SELECT entity_id FROM {field_data_field_date_created} WHERE field_date_created_value = :date";
   $args_get_timesheet_nids_by_date = array(
     ':date' => $date,
@@ -120,7 +121,7 @@ function _check_if_timesheet_exists($ticket_nid, $date){
   }
   $arrs_intersected = array_intersect( $arr_by_ticket_nid , $arr_by_date);
   $nid = $arrs_intersected[array_keys($arrs_intersected)[0]] ;
-  if(!empty($nid)) {
+  if (!empty($nid)) {
     return $nid;
   }
   return 0;
@@ -135,10 +136,10 @@ function add_timesheet_form($form, &$form_state) {
   $current_roles = $user->roles;
   $access_value = get_access_admin_value($current_roles);
   $form = array();
-  $hours =array(1,2,3,4,5,6,7,8,9,10,11,12);
-  if ($access_value > 0 || $user->uid == $uid ) {
+  $hours =array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+  if ($access_value > 0 || $user->uid == $uid) {
     $timesheet_exists =  _check_if_timesheet_exists($ticket_nid, $date);
-    if ($timesheet_exists !== 0 ){
+    if ($timesheet_exists !== 0 ) {
       $node = node_load($timesheet_exists);
       $form['timesheet_exists'] = array(
        '#type' => 'hidden',
@@ -199,7 +200,8 @@ function add_timesheet_form($form, &$form_state) {
            'wrapper' => 'ajax_form_message_wrapper',
           ),
        );
-    }else {   
+    }
+    else {   
       $form['hours'] = array(
         '#type' => 'textfield',
         '#title' => t('Spent hours') ,
@@ -244,12 +246,13 @@ function add_timesheet_form($form, &$form_state) {
         ),
       );
     }    
-  }else {
-    $message3 = t('Only Project Managers and Admins can');
+  }
+  else {
+    $message = t('Only Project Managers and Admins can edit their collegue\'s');
     $form['textfield3'] = array(
       '#type' => 'textfield',
       '#size' => 34,
-      '#value' => $message3,
+      '#value' => $message,
       '#attributes' => array(
       'readonly' => 'readonly'
       ) ,
@@ -261,19 +264,22 @@ function add_timesheet_form_validate($form, &$form_state) {
   $timesheet_exists = $form_state['values']['timesheet_exists'];
   $validated = 1;
   if (!empty($timesheet_exists)) {
-    if($form_state['values']['hours_exist'] == 0 || empty($form_state['values']['hours_exist'])) {
-      form_set_error('hours_exist', t('You cannot leave the field empty :) '));
+    if ($form_state['values']['hours_exist'] == 0 || empty($form_state['values']['hours_exist'])) {
+      form_set_error('hours_exist', t('You cannot leave the field empty :)'));
       $validated = 0;
-    }elseif( $form_state['values']['hours_exist'] >= 16) { 
+    }
+    elseif ($form_state['values']['hours_exist'] >= 16) { 
       form_set_error('hours_exist', t('YOU MUST SLEEP :)'));
       $validated = 0;
     } 
-  }else {
-    if($form_state['values']['hours'] == 0 || empty($form_state['values']['hours'])) {
+  }
+  else {
+    if ($form_state['values']['hours'] == 0 || empty($form_state['values']['hours'])) {
       form_set_error('hours', t('You cannot leave the field empty :)'));
       $validated = 0;
-    }elseif( $form_state['values']['hours'] >= 16) {
-      form_set_error('hours', t('YOU MUST SLEEP :) '));
+    }
+    elseif ($form_state['values']['hours'] >= 16) {
+      form_set_error('hours', t('YOU MUST SLEEP :)'));
       $validated = 0;
     } 
   }  
@@ -286,9 +292,10 @@ function add_timesheet_form_submit($form, &$form_state) {
   $date = $form_state['values']['date'];    
   $comment = $form_state['values']['body_exist'];   
   $node = $form_state['values']['node']; 
-  if( !empty($node) ){
+  if (!empty($node)) {
     $timesheet = _update_timesheet($node, $comment, $hours_spent, $node);
-  }else {
+  }
+  else {
     $comment = $form_state['values']['body'];    
     $hours_spent = $form_state['values']['hours'];
     $new_timesheet = _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment);
@@ -300,7 +307,7 @@ function ajax_form_add_timesheet_form_submit($form, &$form_state ) {
   ctools_modal_add_js(); 
   $commands = array();
   $validated = $form_state['values']['validated'];  
-  if (!$validated){
+  if (!$validated) {
     $a = '<div id="ajax_form_message_wrapper"></div>' ;
     return $a; 
   }
@@ -318,7 +325,7 @@ function _update_timesheet($node, $comment, $hours_spent) {
 function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment) {
   global $user; 
   $date_arr = explode('-', $date);
-  $date_arr[2] = '20' .  $date_arr[2];
+  $date_arr[2] ='20' . $date_arr[2];
   $field_date_created = implode('-', $date_arr);
   $week_date = $field_date_created;
   $week_date_obj = new DateTime($week_date);

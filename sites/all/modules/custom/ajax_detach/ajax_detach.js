@@ -5,8 +5,9 @@
  *
  */
 (function($) {
-  Drupal.behaviors.ajax_detach = {
+  Drupal.behaviors.manage_dashboard = {
     attach: function(context, settings) {
+      // some theming code
       $('.custom-class-node-title').find('a').attr('style', 'text-decoration: none; color: black;');
       $('a:contains("New ticket")').css('color', 'white');
       $('a:contains("Add a skill")').css('color', 'white');
@@ -19,13 +20,14 @@
       $('.add_to_team_custom.ctools-use-modal-processed').attr('id', 'add_to_team_custom');
       $('#user-add-to-project-form').css('background-color', 'black');
       $('#role-label').css('padding-top','10px');
-      
+      // initializes elements for future droppable areas
       var list_open = $('#list-open').find('.item-list');
       var list_development = $('#list-dev').find('.item-list');
       var list_ready = $('#list-red').find('.item-list');
       var list_test = $('#list-test').find('.item-list');
       var list_closed = $('#list-closed').find('.item-list');
-      
+      // decalres draggable area of the 1 tickets <li> block
+      // When the lmb is held over the block   
       var drag_area = $('li.custom-row-class ').mousedown(function() {
         drag_area.draggable({
           containment: ".row",
@@ -34,9 +36,11 @@
             $(this).removeClass('dropped');
             return $(this).addClass('catched');
           },
-          revert: "invalid", // when not dropped, the item will revert back to its initial position
+          revert: "invalid", // when not dropped, will revert to its initial position
         });
       });
+      // declares droppable ares when mouse is over the block
+      // and executes appending as sends POST request to change the tickets status
       list_open.mouseover(function() {
         var drop_area = list_open;
         drop_area.droppable({
@@ -123,21 +127,6 @@
           }
         });  
       });
-      
-      $('.ajax-detach-user').click(function(e) {
-        e.preventDefault();
-        var myUrl = $(this).attr('href');
-        if ( jQuery.post(myUrl, 0) ) {
-          $(this).parent().parent().hide();
-        }
-      });
-      Object.size = function(obj) {
-        var size = 0, key;
-        for(key in obj) {
-          if (obj.hasOwnProperty(key)) size++;
-        }
-        return size;
-      };
     }
   };
 }(jQuery));

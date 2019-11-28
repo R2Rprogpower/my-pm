@@ -9,141 +9,103 @@
  * Implements hook_permission().
  */
 function ajax_detach_permission() {
-    return array(
-        'custom access content' => array(
-            'title' => t('Access content for the ajax_detach module') ,
-        )
-    );
+  return array(
+    'custom access content' => array(
+      'title' => t('Access content for the ajax_detach module') ,
+    )
+  );
 }
-
-
-
-
- 
-
-
-
-
 /**
  * Implements hook_menu().
  */
-
 function ajax_detach_menu() {
     $items = array();
-
     $items['detach_user/ajax/%/%'] = array( //this creates a URL that will call this form at "examples/form-example"
-        'title' => 'control_user Form', //page title
-        'description' => 'Detach user',
-        'type' => MENU_CALLBACK,
-        'page callback' => 'detach_user_ajax_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
-                'access arguments' => array(
-            'access content'
-        ) ,  
+      'title' => 'control_user Form', //page title
+      'description' => 'Detach user',
+      'type' => MENU_CALLBACK,
+      'page callback' => 'detach_user_ajax_callback', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+      'access arguments' => array(
+        'access content'
+      ),  
     );
     $items['change_ticket_status/ajax/%/%'] = array(
-        'title' => 'change ticket status' ,
-        'type' => MENU_CALLBACK,
-        'page callback' => 'change_ticket_status_ajax',
-        'access arguments' => array(
-            'access content'
-        ) ,
+      'title' => 'change ticket status' ,
+      'type' => MENU_CALLBACK,
+      'page callback' => 'change_ticket_status_ajax',
+      'access arguments' => array(
+        'access content'
+      ),
     );
-     $items['get_project_team_dom_id/ajax/%'] = array(
-        'title' => 'change ticket status' ,
-        'type' => MENU_CALLBACK,
-        'page callback' => 'get_project_team_dom_id_ajax',
-           'access arguments' => array(
-            'access content'
-        ) ,
+    $items['get_project_team_dom_id/ajax/%'] = array(
+      'title' => 'change ticket status',
+      'type' => MENU_CALLBACK,
+      'page callback' => 'get_project_team_dom_id_ajax',
+      'access arguments' => array(
+        'access content'
+      ),
     );
-
     return $items;
 }
-
- 
 function get_project_team_dom_id_ajax() {
-   
-      $selector = '.view-dom-id-' . arg(2) ;
-      $my_view_name = 'project_team';
-      $my_display_name = 'block';
-      $commands = array();
-      $my_view = get_my_view($my_view_name, $my_display_name);
-      $commands[] = ajax_command_replace($selector, $my_view);    
-      $commands[] = ajax_command_alert('$selector');
-      print ajax_render($commands);
- 
-  
+  $selector = '.view-dom-id-' . arg(2);
+  $my_view_name = 'project_team';
+  $my_display_name = 'block';
+  $commands = array();
+  $my_view = get_my_view($my_view_name, $my_display_name);
+  $commands[] = ajax_command_replace($selector, $my_view);    
+  $commands[] = ajax_command_alert('$selector');
+  print ajax_render($commands);
 }
-
-
-
 function change_ticket_status_ajax() {
-    global $user;
-    $uid = $user->uid;
-    $this_user = user_load($uid); 
-    $this_user_projects = $this_user->field_project[LANGUAGE_NONE];
-    $ticket_nid = arg(2);
+  global $user;
+  $uid = $user->uid;
+  $this_user = user_load($uid); 
+  $this_user_projects = $this_user->field_project[LANGUAGE_NONE];
+  $ticket_nid = arg(2);
+  $ticket = node_load($ticket_nid);
+  $ticket_project_nid = $ticket->field_project[LANGUAGE_NONE][0]['nid'];
+  $access_value_proj = check_if_user_in_proj($uid, $ticket_nid);
+  $access_value_admin = get_access_admin_value($user->roles);
+  if ($access_value_proj == 1 or $access_value_admin == 1) {
+    $new_status_tid = arg(3);
     $ticket = node_load($ticket_nid);
-    $ticket_project_nid = $ticket->field_project[LANGUAGE_NONE][0]['nid'];
-    $access_value_proj = check_if_user_in_proj($uid, $ticket_nid);
-    $access_value_admin = get_access_admin_value($user->roles);
-    if ($access_value_proj == 1 or $access_value_admin == 1 ) {
-    
-        $new_status_tid = arg(3);
-        $ticket = node_load($ticket_nid);
-        $ticket->field_status[LANGUAGE_NONE][0]['tid'] = $new_status_tid;
-        node_save($ticket);
-    } 
-    else {
-     drupal_set_message( t('<pre>' . print_r('In order to move tickets across the Dashboard, You have to be a member of the project\'s team' , TRUE) . '</pre>') );  
-
-    }
-    
-   
-
+    $ticket->field_status[LANGUAGE_NONE][0]['tid'] = $new_status_tid;
+    node_save($ticket);
+  }
+  else {
+  drupal_set_message( t('<pre>' . print_r('In order to move tickets across the Dashboard, You have to be a member of the project\'s team' , TRUE) . '</pre>') );  
+  }
 }
-/**
- * Callback function that displays a simple Ajax powered link.
- */
-
 function detach_user_ajax_callback($ajax = 'ajax') {
-    global $user;
-    $current_roles = $user->roles;
-    $access_value = get_access_pm_value($current_roles);
-    if ($access_value > 0)     {
-        $nid = arg(2);
-        $uid = arg(3);
-        $user_to_detach = user_load($uid);
-     
-    }
-    if ( check_if_user_in_proj($user_to_detach->uid, $nid) ) {
-           user_delete_from_project($nid, $uid);
-       
-    }
+  global $user;
+  $current_roles = $user->roles;
+  $access_value = get_access_pm_value($current_roles);
+  if ($access_value > 0) {
+    $nid = arg(2);
+    $uid = arg(3);
+    $user_to_detach = user_load($uid);
+  }
+  if (check_if_user_in_proj($user_to_detach->uid, $nid)) {
+    user_delete_from_project($nid, $uid);
+  }
 }
-
 function check_if_user_in_proj($uid, $this_project_nid ) {
-    $access_value = 0;
-    if ($uid !== 1) {
+  $access_value = 0;
+  if ($uid !== 1) {
     $this_user = user_load($uid); 
     $this_user_projects = $this_user->field_project[LANGUAGE_NONE];
- 
-     foreach ($this_user_projects as $index) {
-        foreach ($index as $nid => $proj) {
-            if ($proj === $this_project_nid ) {
-               $access_value = 1;
-                
-            }
+    foreach ($this_user_projects as $index) {
+      foreach ($index as $nid => $proj) {
+        if ($proj === $this_project_nid ) {
+          $access_value = 1;
         }
- 
+      }
     }
-}
-else {
+  }
+  else {
     $access_value = 1;
     return $access_value;
+  }
+  return $access_value;
 }
- return $access_value;
-     
-}
-
- 
