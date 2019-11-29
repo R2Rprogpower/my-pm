@@ -13,7 +13,19 @@ ol {
     
     
     
-}.panels-flexible-region.panels-flexible-region-16-right_.panels-flexible-region-last{
+}#save_timesheets_button{
+    margin: 0% 50%;
+    position: absolute;
+    margin-top: -4.5em;
+    max-height: 23px;
+}
+    
+
+.calendar-calendar.td.calendar-agenda-items {
+  border: 0px solid #CCCCCC;
+    
+}    
+.panels-flexible-region.panels-flexible-region-16-right_.panels-flexible-region-last{
            width:100px;
            float:right;
            max-heigt:50px;

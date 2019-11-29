@@ -337,6 +337,7 @@ function module_load_include($type, $module, $name = NULL) {
 
   if (function_exists('drupal_get_path')) {
     $file = DRUPAL_ROOT . '/' . drupal_get_path('module', $module) . "/$name.$type";
+    
     if (is_file($file)) {
       require_once $file;
       $files[$key] = $file;
@@ -348,7 +349,7 @@ function module_load_include($type, $module, $name = NULL) {
   }
   return FALSE;
 }
-
+ 
 /**
  * Loads an include file for each module enabled in the {system} table.
  */

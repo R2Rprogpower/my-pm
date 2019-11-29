@@ -29,6 +29,7 @@
 $index = 0;
 $header_ids = array();
 $start_date = date_format($view->date_info->min_date, 'U'); 
+            
 foreach ($day_names as $key => $value) {
   $header_ids[$key] = $value['header_id'];
 }
@@ -38,9 +39,9 @@ foreach ($day_names as $key => $value) {
   <div class="week-view">
     <table class="full">
       <thead>
-        <tr>
+        <tr  style ="background-color: #eee;"  >
           <?php if($by_hour_count > 0 || !empty($start_times)) :?>
-          <th class="calendar-agenda-hour">
+          <th style ="float:left;" class="calendar-agenda-hour">
             <?php print t('Timesheets')?>
           </th>
           <?php endif;?>
@@ -107,20 +108,21 @@ foreach ($day_names as $key => $value) {
         ?>
         <?php //     $ticket_table_1 ?>
         <?php foreach ($projects_and_tickets as $index => $title): ?>
-          <tr  class="not-all-day">
-            <td id="<?php print $index[0]; ?>" class="calendar-agenda-hour">
-              <span class="calendar-hour"><a href = "/node/<?php $prenid = explode('_', $index); $nid = $prenid[1];   print $nid ;?>" ><?php print $title   ; ?></a></span>
+        <tr  class="not-all-day" style="<?php $prenid = explode('_', $index); ($prenid[0] =='proj') ? print 'background-color: #f7f7f7': 'float:left; margin-left:10px;' ?>">
+            <td  style="" id="<?php print $index[0]; ?>" class="calendar-agenda-hour">
+              <span   class="calendar-hour">
+                <a style="<?php ($prenid[0] =='proj') ? print 'float:left;' : print 'float:left; margin-left:10px;' ?>" href = "/node/<?php  $nid = $prenid[1];   print $nid ;?>" ><?php print $title   ; ?></a>
+              </span>
             </td>
             <?php $curpos = 0; ?>
             <?php foreach ($columns as $index => $column): ?>
               <?php $colpos = (isset($title['values'][$column][0])) ? $title['values'][$column][0]['wday'] : $index; ?>
               <?php $curpos = $colpos + 1;?>
               <td id ="<?php print 'cell_' . $cell_id =   ( $prenid[0] == 'total') ?  $prenid[0] . '_' . $prenid[1] . '_' . $dates[$index] :  $prenid[1] . '_' . $dates[$index] ;?>" class="calendar-agenda-items single-day" headers="<?php print $header_ids[$index] . 'adsa' ?>">
-                <div  class="calendar">
-                  <div style="text-align: center;" class="inner">
-                      
+               
+                  <div style="min-height: 23px; text-align: center;" class="inner">
                     <?php if( $prenid[0] == 'tick') :?>
-                      <input  style="font-size:15px;text-align: center;height:23px;width:23px;    margin: 5% 0 5% 0;"  maxlength="2" type="text"></input> 
+                      <input id="input_field"  style="font-size:15px;text-align: center;height:23px;width:23px;    margin: 5% 0 5% 0;"  maxlength="2" type="text"></input> 
                     <?php
                      $text = "<button  style=\"width:10px;\"  class=\"custom-button-timesheets-plus\">
                        +</button>";
@@ -160,6 +162,6 @@ foreach ($day_names as $key => $value) {
 </div>
 <script> 
   (function ($) {
-    Drupal.attachBehaviors(document, Drupal.settings);
+  Drupal.attachBehaviors(document, Drupal.settings);
   }(jQuery));
 </script>

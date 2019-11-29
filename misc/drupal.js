@@ -590,7 +590,15 @@ $(function () {
 
 //Attach all behaviors.
 $(function () {
-  Drupal.attachBehaviors(document, Drupal.settings);
+  var path = window.location.pathname;
+  var pathSplit = path.split('/');
+  if (pathSplit[3] == 'timesheets' || pathSplit[2] == 'timesheets') {
+  
+  
+  }
+  else{
+    Drupal.attachBehaviors(document, Drupal.settings);
+  }
 });
 
 /**

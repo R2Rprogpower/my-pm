@@ -27,8 +27,8 @@ function bootstrap_preprocess_date_views_pager(array &$variables) {
     // Because this is using the "date_nav" context, this must use "Prev"
     // instead of the full English word "Previous".
     // @todo Should this be fixed upstream in the date/date_views module?
-    'prev' => t('Prev', array(), array('context' => 'date_nav')),
-    'next' => t('Next', array(), array('context' => 'date_nav')),
+    'prev' => t('', array(), array('context' => 'date_nav')),
+    'next' => t('', array(), array('context' => 'date_nav')),
   );
 
   // Icon map.

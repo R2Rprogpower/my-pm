@@ -14,24 +14,29 @@
 (function ($) {
   Drupal.behaviors.timesheets = {
     attach: function (context, settings) {
+     $(document).ready(function () { 
       var path = window.location.pathname;
       var pathSplit = path.split('/');
-      if (pathSplit[3] == 'timesheets') {
-        $(document).ready(function () {  
+      
+ 
+      if (pathSplit[3] == 'timesheets' || pathSplit[2] == 'timesheets') {
+      
           var dateTh= { obj: $('th.days.mon') };
           var monDate = dateTh.obj[0].id;   
           var dateArr = monDate.split('/');
           var date =  dateArr.join('-'); 
-          var data = {"date1" : date} ;
+          var data = {"date" : date} ;
           var total_sums = {};
           var url1 = path + '/ajax';
+          console.log(url1);
           $.ajax({
             type: 'POST',
             url: url1 ,
             data: data,
             dataType: 'html',
             success: function (timesheetsInfoJson) {
-              var timesheetsInfo = JSON.parse(timesheetsInfoJson );
+              var timesheetsInfo = JSON.parse(timesheetsInfoJson);
+              console.log(timesheetsInfo);
               // Creates the selectors off the timesheets info data 
               // and fills  elements with the values from the same data.
               $.each(timesheetsInfo, function(index, data){ 
@@ -39,28 +44,92 @@
                 var dateCreated = data['date_created'].replace('-','\\/').replace('-','\\/');
                 var projectNid =  data['project'];
                 var hoursSpent = data['time_spent']; 
+                var comment = data['comment'];
                 var inputSelector = '#cell_' + ticketRef + '_' + dateCreated;
                 // prevents JS from sending undefined error
                 if (total_sums[projectNid+'_'+dateCreated] === undefined) {
                   total_sums[projectNid+'_'+dateCreated] = 0;
                 }
-                // fills the array of sums of hours spent on tickets of the a project on a date 
-                //                 indexed by project and date
+                // Fills the array of sums of hours spent on tickets of the a project on a date
+                //                 indexed by project and date.
                 total_sums[projectNid+'_'+dateCreated] =   parseInt(total_sums[projectNid+'_'+dateCreated], 10) +  parseInt(hoursSpent, 10) ;
                 var totalSelector = '#cell_total_' + projectNid + '_' + dateCreated;
                 if ($(inputSelector).length > 0) {  
                   var inputField =  $(inputSelector).find('input'); 
-                  inputField.css('background-color', 'red');
+                  if(comment !== 'empty'){
+                    inputField.css('background-color', '#d3d3d3');
+                  }
                   inputField.val( hoursSpent );
-                  //selecting 'total' field and filling it with the value from  total_sums
-                  var currentValue = parseInt($(totalSelector).find('#total_sum').html() );
-                  $(totalSelector).find('#total_sum').html ( total_sums[projectNid+'_'+dateCreated]);
-                }   
+                  // Selects 'total' field and filling it with the value from  $total_sums.
+                  $(totalSelector).find('#total_sum').html(total_sums[projectNid + '_' + dateCreated]);
+                 }   
               });
             }
+          }); var oldVal
+           $('input#input_field').on('mouseover', function()  {
+             oldVal = this.value;
+             if (oldVal == '') {
+               oldVal = 0;
+             }
           });
+          $.each($('input#input_field'), function(){ 
+            $(this).on("change", function() {
+              var val = this.value
+              if(val < 1 ) {
+                if(val == ''){
+                  $(this).val("");
+                }
+                else{
+                 $(this).val(oldVal);
+                }
+                alert("You Must Work");
+              }
+              else if( val > 12) {
+                 if(val == ''){
+                  $(this).val("");
+                }
+                else{
+                 $(this).val(oldVal);
+                }
+                
+               alert("You Must Sleep");
+              } 
+              else {
+                var url_info = $(this).parent().parent().attr('id').split('_');
+                var uid = pathSplit[2];
+                //console.log(uid);
+                var ticket_nid = url_info[1];
+                var date = url_info[2];
+                var dateArr = date.split('/');
+                var date =  dateArr.join('-'); 
+                var hours = val;
+                var url0 = '/ajax/timesheets/' + uid + '/' + ticket_nid + '/' + hours + '/' + date + '/insta_add_timesheet';
+                $.ajax({
+                  type: 'POST',
+                  url: url0 ,
+                  dataType: 'json',
+                  success: function (projectNid) {
+                    var dateCreated = date.replace('-','\\/').replace('-','\\/');
+                    var totalSelector = '#cell_total_' + projectNid.data + '_' + dateCreated;
+                    if (oldVal == 0) {
+                      var change = -parseInt(val);
+                    }else{
+                      var change = parseInt(oldVal) - parseInt(val);
+                    }
+                    var currentValue = parseInt($(totalSelector).find('#total_sum').html() );
+                    currentValue = currentValue - change;  
+                    $(totalSelector).find('#total_sum').html(currentValue);
+                  
+                  }   
+                });
+              } 
+               
+            });
+            
+              });  
+        
+        }
         });
-      }
     } 
   }
 Drupal.behaviors.timesheets1 = {
@@ -88,6 +157,6 @@ Drupal.behaviors.timesheets1 = {
       });
     }
   }
-  Drupal.attachBehaviors(document, Drupal.settings);
-}(jQuery));
+  //Drupal.attachBehaviors(document, Drupal.settings);
+ }(jQuery));
 

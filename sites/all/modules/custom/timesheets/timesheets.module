@@ -33,8 +33,48 @@ function timesheets_menu() {
         'access content'
         ) , 
     );
+    $items['ajax/timesheets/%/%/%/%/insta_add_timesheet'] = array(
+      'title' => 'load ts ', //page title
+      'description' => 'load timesheets for timesheet page dispaly',
+      'type' => MENU_CALLBACK,
+      'page callback' => 'ajax_insta_add_timesheet', //this is the function that will be called when the page is accessed.  for a form, use drupal_get_form
+      'access arguments' => array(
+        'access content'
+      ) , 
+    );
+   
   return $items;
 }
+function ajax_insta_add_timesheet($ajax = 'ajax') {
+  $uid = arg(2);
+  $ticket_nid = arg(3);
+  $hours_spent = arg(4);
+  $date = arg(5);
+  $comment = 'empty';
+  
+  $timesheet_exists = _check_if_timesheet_exists($ticket_nid, $date);
+  global $user;
+  $current_roles = $user->roles;
+  $access_value = get_access_admin_value($current_roles);
+  if ($access_value > 0 || $user->uid == $uid) {
+      $timesheet_exists = _check_if_timesheet_exists($ticket_nid, $date);
+      $timehseet = node_load($timesheet_exists);
+      if (!empty($timehseet)) {
+        $update_timesheet = _update_timesheet($timehseet, $comment, $hours_spent);
+      }
+      else {
+        $new_timesheet = _create_new_timesheet($uid, $ticket_nid, $hours_spent, $date, $comment);
+      }
+  }
+ 
+  $ticket = node_load($ticket_nid);
+  $project_nid = $ticket->field_project['und'][0]['nid'];
+  $js_output = array('data' => $project_nid);
+  
+  drupal_json_output($js_output);
+
+}
+
 function ajax_timesheets_page_get_new_date_callback($ajax = 'ajax') {
   $url = 'user/' . arg(6) . '/timesheets/veiw/ajax/week/' . arg(5);
   menu_set_active_item($url );
@@ -48,7 +88,7 @@ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
   if (!empty(arg(1))) {
     $uid = arg(1) ;
   }    
-  $date = $_POST['date1'] ;
+  $date = $_POST['date'] ;
   $week_date_obj = new DateTime($date);
   $week  = $week_date_obj->format("W");
   $timesheet_info_table = views_get_view_result($timesheet_table_view_name, $timesheet_table_view_display,  $uid,  $week);
@@ -75,7 +115,7 @@ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
       'week_created' => $node->field_field_week_created[0]['raw']['value'],
       'time_spent' => $node->field_field_time_spent[0]['raw']['value'],
       'user_ref' => $node->field_field_user_reference[0]['raw']['uid']  ,
-      'comment' => (empty($body = $node->field_body[0]['raw']['value']) ) ? 'empty' : $body,
+      'comment' => (empty($body = $node->field_body[0]['raw']['value'])) ? 'empty' : $body,
       'project' => $node->field_field_project[0]['raw']['nid'],
       );
     }
@@ -100,32 +140,6 @@ function ajax_modal_timesheets_forms_page_callback($js = NULL) {
     return drupal_get_form('add_timesheet_form');
   }
 }  
-function _check_if_timesheet_exists($ticket_nid, $date) {
-  $query_get_timesheet_nids_by_date = "SELECT entity_id FROM {field_data_field_date_created} WHERE field_date_created_value = :date";
-  $args_get_timesheet_nids_by_date = array(
-    ':date' => $date,
-  );
-  $query_get_timesheet_nids_by_ticket_nid= "SELECT entity_id FROM {field_data_field_ticket_reference} WHERE field_ticket_reference_target_id = :ticket_nid";
-  $args_get_timesheet_nids_by_ticket_nid = array(
-    ':ticket_nid' => $ticket_nid,
-  );
-  $result_by_date = db_query($query_get_timesheet_nids_by_date, $args_get_timesheet_nids_by_date);
-   $arr_by_date =[] ; 
-  foreach ($result_by_date as $field_name => $value) {
-     $arr_by_date[$field_name] = $value->entity_id;
-  }
-  $result_by_ticket_nid  = db_query($query_get_timesheet_nids_by_ticket_nid , $args_get_timesheet_nids_by_ticket_nid );
-  $arr_by_ticket_nid = [] ; 
-  foreach ($result_by_ticket_nid as $field_name => $value) {
-    $arr_by_ticket_nid[$field_name] = $value->entity_id;
-  }
-  $arrs_intersected = array_intersect( $arr_by_ticket_nid , $arr_by_date);
-  $nid = $arrs_intersected[array_keys($arrs_intersected)[0]] ;
-  if (!empty($nid)) {
-    return $nid;
-  }
-  return 0;
-}
 function add_timesheet_form($form, &$form_state) {
   $uid = arg(1);
   $ticket_nid = arg(6);
@@ -248,13 +262,13 @@ function add_timesheet_form($form, &$form_state) {
     }    
   }
   else {
-    $message = t('Only Project Managers and Admins can edit their collegue\'s');
+    $message = t('Only Project Managers and Admins can edit their collegue\'s timesheets!');
     $form['textfield3'] = array(
       '#type' => 'textfield',
       '#size' => 34,
       '#value' => $message,
       '#attributes' => array(
-      'readonly' => 'readonly'
+        'readonly' => 'readonly'
       ) ,
     );
   }
@@ -293,7 +307,7 @@ function add_timesheet_form_submit($form, &$form_state) {
   $comment = $form_state['values']['body_exist'];   
   $node = $form_state['values']['node']; 
   if (!empty($node)) {
-    $timesheet = _update_timesheet($node, $comment, $hours_spent, $node);
+    $timesheet = _update_timesheet($node, $comment, $hours_spent);
   }
   else {
     $comment = $form_state['values']['body'];    
@@ -318,8 +332,8 @@ function ajax_form_add_timesheet_form_submit($form, &$form_state ) {
   );
 }
 function _update_timesheet($node, $comment, $hours_spent) {
-  $node->body['und'][0]['value'] = $comment;
-  $node->field_time_spent['und'][0]['value'] = $hours_spent;
+  $node->body[LANGUAGE_NONE][0]['value'] = $comment;
+  $node->field_time_spent[LANGUAGE_NONE][0]['value'] = $hours_spent;
   node_save($node);
 }
 function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment) {
@@ -327,32 +341,56 @@ function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $com
   $date_arr = explode('-', $date);
   $date_arr[2] ='20' . $date_arr[2];
   $field_date_created = implode('-', $date_arr);
-  $week_date = $field_date_created;
-  $week_date_obj = new DateTime($week_date);
-  $week_created = $week_date_obj->format("W");
-  $date_field = array(
-    'value' => $date,
-  );
-  $node = new stdClass();
-  $node->title = "user's " . $user_uid . " Timesheet for ticket " . $ticket_nid . ' and date ' . $date;
-  $node->type = "timesheet";
-  node_object_prepare($node); 
-  $node->language = LANGUAGE_NONE; 
-  $node->uid = $user->uid; 
-  $node->status = 1; 
-  $node->promote = 0; 
-  $node->comment = 0; 
-  $node->field_time_spent[$node->language][]['value'] = $hours_spent;
-  $node->body[$node->language][]['value'] = (empty($comment) ) ? 'empty' : $comment;
-  $node->field_ticket_reference[$node->language][] = array(
-    'target_id' => $ticket_nid,
-    'target_type' => 'node',
-  );
-  $node->field_user_reference[$node->language][0]['uid'] = $user_uid;
-  $node->field_date_created[$node->language][0] = $date_field;
-  $node->field_week_created[$node->language][0]['value'] = $week_created;
-  $node = node_submit($node); // Prepare node for saving
-  node_save($node);
+  $timesheet_exists = _check_if_timesheet_exists($ticket_nid, $field_date_created);
+  if($timesheet_exists == 0){
+    $week_date = $field_date_created;
+    $week_date_obj = new DateTime($week_date);
+    $week_created = $week_date_obj->format("W");
+    $date_field = array(
+      'value' => $date,
+    );
+    $node = new stdClass();
+    $node->title = "user's " . $user_uid . " Timesheet for ticket " . $ticket_nid . ' and date ' . $date;
+    $node->type = "timesheet";
+    node_object_prepare($node); 
+    $node->language = LANGUAGE_NONE; 
+    $node->uid = $user->uid; 
+    $node->status = 1; 
+    $node->promote = 0; 
+    $node->comment = 0; 
+    $node->field_time_spent[$node->language][]['value'] = $hours_spent;
+    $node->body[$node->language][]['value'] = (empty($comment) ) ? 'empty' : $comment;
+    $node->field_ticket_reference[$node->language][] = array(
+      'target_id' => $ticket_nid,
+      'target_type' => 'node',
+    );
+    $node->field_user_reference[$node->language][0]['uid'] = $user_uid;
+    $node->field_date_created[$node->language][0] = $date_field;
+    $node->field_week_created[$node->language][0]['value'] = $week_created;
+    $node = node_submit($node); // Prepare node for saving
+    node_save($node);
+  }
 }
-
+function _check_if_timesheet_exists($ticket_nid, $date) {
+  $query_get_timesheet_nids_by_date = "SELECT entity_id FROM {field_data_field_date_created} WHERE field_date_created_value = :date";
+  $args_get_timesheet_nids_by_date = array(':date' => $date);
+  $query_get_timesheet_nids_by_ticket_nid = "SELECT entity_id FROM {field_data_field_ticket_reference} WHERE field_ticket_reference_target_id = :ticket_nid";
+  $args_get_timesheet_nids_by_ticket_nid = array(':ticket_nid' => $ticket_nid);
+  $result_by_date = db_query($query_get_timesheet_nids_by_date, $args_get_timesheet_nids_by_date);
+  $arr_by_date =[] ; 
+  foreach ($result_by_date as $field_name => $value) {
+     $arr_by_date[$field_name] = $value->entity_id;
+  }
+  $result_by_ticket_nid  = db_query($query_get_timesheet_nids_by_ticket_nid , $args_get_timesheet_nids_by_ticket_nid );
+  $arr_by_ticket_nid = [] ; 
+  foreach ($result_by_ticket_nid as $field_name => $value) {
+    $arr_by_ticket_nid[$field_name] = $value->entity_id;
+  }
+  $arrs_intersected = array_intersect( $arr_by_ticket_nid , $arr_by_date);
+  $nid = $arrs_intersected[array_keys($arrs_intersected)[0]] ;
+  if (!empty($nid)) {
+    return $nid;
+  }
+  return 0;
+}
 

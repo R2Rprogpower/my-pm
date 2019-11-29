@@ -46,7 +46,7 @@
 }
 .calendar-calendar td {
   width: 14%;
-  border: 1px solid #ccc;
+  
   color: #777;
   text-align: right;
   vertical-align: top;
@@ -247,8 +247,7 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar td.calendar-agenda-hour {
   text-align: right;
   border: none;
-  border-top: 1px solid #CCCCCC;
-  padding-top: .25em;
+   padding-top: .25em;
   width: 1%;
 }
 .calendar-calendar td.calendar-agenda-no-hours {
@@ -262,7 +261,7 @@ table.calendar-legend tr.even .stripe {
   font-size: 1em;
 }
 .calendar-calendar td.calendar-agenda-items {
-  border: 1px solid #CCCCCC;
+  
   text-align: left;
 }
 .calendar-calendar td.calendar-agenda-items div.calendar {
@@ -309,8 +308,7 @@ table.calendar-legend tr.even .stripe {
   color: #777;
   padding: 0.2em;
   width: auto;
-  border: 1px solid #ccc;
-}
+ }
 .calendar-calendar div.date-nav a,
 .calendar-calendar div.date-nav h3 {
   color: #777;
@@ -320,7 +318,7 @@ table.calendar-legend tr.even .stripe {
   background-color: #eee;
   color: #777;
   font-weight: bold;
-  border: 1px solid #ccc;
+  
 }
 .calendar-calendar td.empty {
   background: #ccc;
@@ -332,7 +330,7 @@ table.calendar-legend tr.even .stripe {
   border-color: #fff;
 }
 .calendar-calendar td div.day {
-  border: 1px solid #ccc;
+  
   border-top: none;
   border-right: none;
   margin-bottom: 2px;
@@ -422,7 +420,7 @@ table.calendar-legend tr.even .stripe {
 }
 
 .calendar-calendar .week-view .full .days {
-  width: 13%;
+  width: 12.7%;
 }
 
 .calendar-calendar .month-view .full div.calendar,
