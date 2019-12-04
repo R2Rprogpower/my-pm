@@ -12,18 +12,41 @@
  
 
 function my_popup_forms_menu()  {
-    $items = array();
+  $items = array();
+  $items['node/%node/ajax/%ctools_js/add_team_member'] = array(
+    'title' => 'modal contents',
+    'page callback' => 'ajax_modal_my_popup_forms_add_to_project_page_callback',
+    'page arguments' => array(3),
+    'access callback' => TRUE, 
+    'file' => 'includes/pages.my_popup_forms.inc',
+    'modal' => TRUE, // This line is where the magic happens.
+  );
+   $items['user/%user/ajax/%ctools_js/add_skill'] = array(
+    'title' => 'modal contents',
+    'page callback' => 'ajax_modal_my_popup_forms_add_skill_page_callback',
+    'page arguments' => array(3),
+    'access callback' => TRUE, 
+    'file' => 'includes/pages.my_popup_forms.inc',
+    'modal' => TRUE, // This line is where the magic happens.
+  );
+  $items['node/%node/ajax/%ctools_js/dashboard/add_new_task'] = array(
+    'title' => 'modal contents',
+    'page callback' => 'ajax_modal_my_popup_forms_dashboard_add_new_task_page_callback',
+    'page arguments' => array(3),
+    'access callback' => TRUE, 
+    'file' => 'includes/pages.my_popup_forms.inc',
+    'modal' => TRUE, // This line is where the magic happens.
+  );
+   $items['ajax/%ctools_js/add/ticket'] = array(
+    'title' => 'modal contents',
+    'page callback' => 'ajax_modal_my_popup_forms_add_new_ticket_page_callback',
+    'page arguments' => array(3),
+    'access callback' => TRUE, 
+    'file' => 'includes/pages.my_popup_forms.inc',
+    'modal' => TRUE, // This line is where the magic happens.
+  );
   
-     $items['node/%node/ajax/%ctools_js/add_team_member'] = array(
-        'title' => 'modal contents',
-        'page callback' => 'ajax_modal_my_popup_forms_page_callback',
-        'page arguments' => array(3),
-        'access callback' => TRUE, 
-        'file' => 'includes/pages.my_popup_forms.inc',
-         'modal' => TRUE, // This line is where the magic happens.
-    );
-         return $items;
-
+  return $items;
 }
   
 

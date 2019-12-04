@@ -28,15 +28,31 @@ ol {
     margin-left: -30px;
     
 }*/
-.modal-content{
-  max-width: 400px;
-  margin-right: 25%;
-  margin-left: 25%;
-
+.form-item.form-item-title.form-type-textfield.form-group{
+  
+  max-width: 360px;
+}
+.form-item.form-item-type.form-type-select.form-group{
+  max-width: 360px;
+}
+.form-item.form-item-status.form-type-select.form-group{
+  max-width: 360px;
+}
+.form-item.form-item-estimate.form-type-select.form-group{
+  max-width: 360px;
+}
+.form-item.form-item-reporter.form-type-select.form-group{
+  max-width: 360px;
+}
+.form-item.form-item-responsible.form-type-select.form-group{
+  max-width: 360px;
+}
+.form-item.form-item-description.form-type-textarea.form-group{
+   max-width: 500px;
 }
 #hour_input {
-    max-width: 35px;
-    margin-bottom: 7px;
+  max-width: 45px;
+  margin-bottom: 7px;
 }
 
 #hour_input label{

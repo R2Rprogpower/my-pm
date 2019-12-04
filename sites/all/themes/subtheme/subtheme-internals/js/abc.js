@@ -45,7 +45,39 @@
       $('li.next').css('margin-left', '-40px');  
      // $('li.next').css('font-size', '6px'); 
       $('.next').find('a').css('background-color', '#eee');
-      
+     
+      $(".ctools-modal-dialog modal-dialog").ready(function () { 
+        var addTimesheetModal = $('.add_timesheet_custom.ctools-use-modal-processed').parent().parent();
+        addTimesheetModal.css('max-width', '400px');
+        //addTimesheetModal.css('margin-right', '25%');
+        addTimesheetModal.css('margin-left', '35%');
+        var addTicketStartDateModal = $('.dashboard_add_new_task_form_submit_custom.ctools-use-modal-processed').find('.form-item-start-date');
+        addTicketStartDateModal;
+        var ticketStartDateLabel = addTicketStartDateModal.find('label');
+        var ticketStartDatedescription = addTicketStartDateModal.find('.help-block');
+        addTicketStartDateModal.parent().prepend(ticketStartDateLabel);
+        addTicketStartDateModal.css('display','block');
+        addTicketStartDateModal.parent().append(ticketStartDatedescription);
+        ticketStartDatedescription.css('margin-top', '60px');
+               
+        var addTicketEndDateModal = $('.dashboard_add_new_task_form_submit_custom.ctools-use-modal-processed').find('.form-item-end-date');
+        var dashTickModal = $('.dashboard_add_new_task_form_submit_custom.ctools-use-modal-processed').parent().parent();
+        dashTickModal.css('max-width', '600px');
+        dashTickModal.css('margin-left', '30%');
+        var ticketEndDateLabel = addTicketEndDateModal.find('label');
+        ticketEndDateLabel.css('margin-bottom', '25px');
+        var ticketEndDatedescription = addTicketEndDateModal.find('.help-block');
+        addTicketEndDateModal.parent().prepend(ticketEndDateLabel);
+        addTicketEndDateModal.css('display','block');
+        addTicketEndDateModal.parent().append(ticketEndDatedescription);
+        ticketEndDatedescription.css('margin-top', '41px');
+        
+        
+        
+      });
+      $(".ctools-modal-dialog modal-dialog").ready(function () { 
+       
+      });
     }
   };
 }(jQuery, Drupal));
