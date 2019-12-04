@@ -161,9 +161,13 @@
       scrollTarget = $(scrollTarget).parent();
     }
     // Only scroll upward.
-    if (offset.top - 10 < $(scrollTarget).scrollTop()) {
-      $(scrollTarget).animate({scrollTop: (offset.top - 10)}, 500);
-    }
+    var path = window.location.pathname;
+    var pathSplit = path.split('/');
+    if (pathSplit[3] !== 'timesheets' || pathSplit[2] !== 'timesheets') {
+      if (offset.top - 10 < $(scrollTarget).scrollTop()) {
+        $(scrollTarget).animate({scrollTop: (offset.top - 10)}, 500);
+      }
   };
+}
 
 })(jQuery);

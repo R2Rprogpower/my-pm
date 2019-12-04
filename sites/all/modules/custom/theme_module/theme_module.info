@@ -1,6 +1,0 @@
-name = ThemeModule
-description = the new theme module for learning
-package = Pro Drupal Development
-core = 7.x
-version = VERSION
-files[] =  thememodule.module

@@ -25,14 +25,13 @@
           });
         });
       };
+      $('.ajax-detach-user').click(function(e) {
+        e.preventDefault();
+        var myUrl = $(this).attr('href');
+        if ( jQuery.post(myUrl, 0) ) {
+          $(this).parent().parent().hide();
+        }
+      });
     }
   }
-        // sends POST request made of the href of the link cliked and hides the row
-  $('.ajax-detach-user').click(function(e) {
-    e.preventDefault();
-    var myUrl = $(this).attr('href');
-    if ( jQuery.post(myUrl, 0) ) {
-      $(this).parent().parent().hide();
-    }
-  });
 }(jQuery));

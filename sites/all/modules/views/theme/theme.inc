@@ -43,7 +43,7 @@ function _views_theme_functions($hook, $view, $display = NULL) {
  */
 function template_preprocess_views_view(&$vars) {
   global $base_path;
-
+   $vars['my_new_title'] = 'mymegatitle';
   $view = $vars['view'];
 
   $vars['rows']       = (!empty($view->result) || $view->style_plugin->even_empty()) ? $view->style_plugin->render($view->result) : '';

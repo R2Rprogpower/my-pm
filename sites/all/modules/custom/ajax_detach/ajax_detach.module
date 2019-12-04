@@ -37,25 +37,7 @@ function ajax_detach_menu() {
         'access content'
       ),
     );
-    $items['get_project_team_dom_id/ajax/%'] = array(
-      'title' => 'change ticket status',
-      'type' => MENU_CALLBACK,
-      'page callback' => 'get_project_team_dom_id_ajax',
-      'access arguments' => array(
-        'access content'
-      ),
-    );
     return $items;
-}
-function get_project_team_dom_id_ajax() {
-  $selector = '.view-dom-id-' . arg(2);
-  $my_view_name = 'project_team';
-  $my_display_name = 'block';
-  $commands = array();
-  $my_view = get_my_view($my_view_name, $my_display_name);
-  $commands[] = ajax_command_replace($selector, $my_view);    
-  $commands[] = ajax_command_alert('$selector');
-  print ajax_render($commands);
 }
 function change_ticket_status_ajax() {
   global $user;

@@ -250,7 +250,6 @@ function template_preprocess_calendar_day(&$vars) {
       $next_start_time = count($start_times) ? array_shift($start_times) : $end_start_time;
     }
   }
-
   // Do the headers last, once we know what the actual values are.
   $i = 0;
   $start_times = array_keys($grouped_items);
@@ -332,6 +331,59 @@ function template_preprocess_calendar_week_overlap(&$vars) {
  * Display a week view.
  */
 function template_preprocess_calendar_week(&$vars) {
+   $view_name = 'user_tickets';
+          $view_display = 'block_1';
+          if(!empty(arg(1))){
+            $uid = arg(1) ;
+          }                      
+          $ticket_table = views_get_view_result($view_name, $view_display, $uid);
+          //get all tickets and projects.
+          $proj_and_tick_nids = array();
+          foreach ($ticket_table as $ticket) {
+            $proj_and_tick_nids[] = $ticket->field_data_field_project_field_project_nid;
+            $proj_and_tick_nids[] = $ticket->nid;
+          }  
+          $proj_and_tick_nids_unique = array_unique($proj_and_tick_nids);
+          $nodes = node_load_multiple($proj_and_tick_nids_unique); 
+          $total_field_text = t('Total');
+          $projects_and_tickets = array();
+          foreach ($nodes as $node){ 
+            if (array_keys($nodes)[0] !== $node->nid && $node->type == 'project') {
+              $total_index = explode( '_', $proj_indx)[1]; 
+              $projects_and_tickets['total_' . $total_index] =   $total_field_text;
+            }
+            switch ($node->type) {
+              case 'project':
+                $proj_indx =   'proj_' . $node->nid;
+                $projects_and_tickets[$proj_indx] = $node->title;
+                break;
+              case 'ticket':
+                $tick_indx = 'tick_' . $node->nid;
+                $projects_and_tickets[$tick_indx] = $node->title;
+                break;
+            }
+          }
+          unset( $projects_and_tickets['total_']);
+          $total_index = explode( '_', $proj_indx)[1]; 
+          $projects_and_tickets['total_' . $total_index] =   $total_field_text;
+  
+  
+  $vars['projects_and_tickets'] = $projects_and_tickets;
+  $vars['plus_button'] = "<button  style=\"width:10px;\"  class=\"custom-button-timesheets-plus\">+</button>";
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   $vars['view']->style_with_weekno = FALSE;
 
   $view = $vars['view'];

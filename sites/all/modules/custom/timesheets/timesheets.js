@@ -14,11 +14,11 @@
 (function ($) {
   Drupal.behaviors.timesheets = {
     attach: function (context, settings) {
-     $(document).ready(function () { 
+  //   $(document).ready(function () { 
+      var oldVal;
       var path = window.location.pathname;
       var pathSplit = path.split('/');
       
- 
       if (pathSplit[3] == 'timesheets' || pathSplit[2] == 'timesheets') {
       
           var dateTh= { obj: $('th.days.mon') };
@@ -56,24 +56,41 @@
                 var totalSelector = '#cell_total_' + projectNid + '_' + dateCreated;
                 if ($(inputSelector).length > 0) {  
                   var inputField =  $(inputSelector).find('input'); 
-                  if(comment !== 'empty'){
+                  if (comment !== 'empty' && comment !== '') {
                     inputField.css('background-color', '#d3d3d3');
                   }
+                 if (comment == 'empty' || comment == '') {
+                    inputField.css('background-color', '#ffffff');
+
+                  }
                   inputField.val( hoursSpent );
-                  // Selects 'total' field and filling it with the value from  $total_sums.
+                  // Selects 'total' field and fills it with the value from  $total_sums.
                   $(totalSelector).find('#total_sum').html(total_sums[projectNid + '_' + dateCreated]);
                  }   
               });
+              var totalSum = $('p#total_sum');
+              $.each(totalSum, function(index, data){ 
+                var totalSumVal =data.innerHTML;
+                if (totalSumVal > 10 && totalSumVal < 20) {
+                  $(this).css('color', '#c1441a');
+                }
+                else if (totalSumVal > 20) {
+                  $(this).css('color', 'red');
+                }
+                else if (totalSumVal < 8 && totalSumVal > 0){
+                 $(this).css('color', 'blue');
+                }
+              });
             }
-          }); var oldVal
-           $('input#input_field').on('mouseover', function()  {
+          }); 
+          $('input#input_field').on('mouseover', function()  {
              oldVal = this.value;
              if (oldVal == '') {
                oldVal = 0;
              }
           });
           $.each($('input#input_field'), function(){ 
-            $(this).on("change", function() {
+            $(this).once().on("change", function() {
               var val = this.value
               if(val < 1 ) {
                 if(val == ''){
@@ -84,7 +101,7 @@
                 }
                 alert("You Must Work");
               }
-              else if( val > 12) {
+              else if( val >= 16) {
                  if(val == ''){
                   $(this).val("");
                 }
@@ -113,23 +130,35 @@
                     var totalSelector = '#cell_total_' + projectNid.data + '_' + dateCreated;
                     if (oldVal == 0) {
                       var change = -parseInt(val);
-                    }else{
+                    }
+                    else {
                       var change = parseInt(oldVal) - parseInt(val);
                     }
                     var currentValue = parseInt($(totalSelector).find('#total_sum').html() );
                     currentValue = currentValue - change;  
                     $(totalSelector).find('#total_sum').html(currentValue);
-                  
+                    var totalSum = $('p#total_sum');  
+                    $.each(totalSum, function(index, data){ 
+                      var totalSumVal =data.innerHTML;
+                       if (totalSumVal > 10 && totalSumVal < 20) {
+                        $(this).css('color', '#c1441a');
+                      }
+                      else if (totalSumVal > 20) {
+                        $(this).css('color', 'red');
+                      }
+                      else if (totalSumVal < 8 && totalSumVal > 0) {
+                        $(this).css('color', 'blue');
+                      }
+                    });
                   }   
                 });
               } 
-               
             });
-            
-              });  
-        
+          });  
+       
         }
-        });
+      
+    //  });
     } 
   }
 Drupal.behaviors.timesheets1 = {

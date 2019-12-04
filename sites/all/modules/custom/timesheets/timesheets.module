@@ -45,6 +45,9 @@ function timesheets_menu() {
    
   return $items;
 }
+// Handles ajax RQ that is sent after input field of an hour is changed.
+// Checks for permissions and either to create a new timesheet or edit an existent one.
+// Sends info about execution to JS so it can style the view appropriatly 
 function ajax_insta_add_timesheet($ajax = 'ajax') {
   $uid = arg(2);
   $ticket_nid = arg(3);
@@ -66,22 +69,26 @@ function ajax_insta_add_timesheet($ajax = 'ajax') {
         $new_timesheet = _create_new_timesheet($uid, $ticket_nid, $hours_spent, $date, $comment);
       }
   }
- 
   $ticket = node_load($ticket_nid);
   $project_nid = $ticket->field_project['und'][0]['nid'];
   $js_output = array('data' => $project_nid);
   
   drupal_json_output($js_output);
-
 }
-
+// Hadles ajax RQ when user tries to switch view across weeks.
+// Simply downloads the view-page by url and sends to it to JS.
 function ajax_timesheets_page_get_new_date_callback($ajax = 'ajax') {
   $url = 'user/' . arg(6) . '/timesheets/veiw/ajax/week/' . arg(5);
-  menu_set_active_item($url );
+  menu_set_active_item($url);
   $timesheets_week = menu_execute_active_handler($url, FALSE);
   $return = array('html' => $timesheets_week);
   echo $return = drupal_json_encode($return);
 }
+// Hadles ajax RQ when user opens any timesheet page.
+// gets results of the timesheets_info view 
+// (timehseets for the current week and the previos one 
+// + ticket_nid + project_nid by references)
+// structures an array and sends it to JS
 function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
   $timesheet_table_view_name = 'timesheets_info';
   $timesheet_table_view_display = 'block';
@@ -124,6 +131,7 @@ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
   $timesheets_info_json = drupal_json_encode($timesheets_info);
   drupal_json_output($timesheets_info);
 }
+// Handles call for popup window when "+" is clicked
 function ajax_modal_timesheets_forms_page_callback($js = NULL) {
   if ($js) {
     ctools_include('ajax');
@@ -139,7 +147,9 @@ function ajax_modal_timesheets_forms_page_callback($js = NULL) {
   else {
     return drupal_get_form('add_timesheet_form');
   }
-}  
+} 
+// The form for adding timesheets
+// generates accordingly to user's access and existence of the timesheet
 function add_timesheet_form($form, &$form_state) {
   $uid = arg(1);
   $ticket_nid = arg(6);
@@ -150,7 +160,6 @@ function add_timesheet_form($form, &$form_state) {
   $current_roles = $user->roles;
   $access_value = get_access_admin_value($current_roles);
   $form = array();
-  $hours =array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
   if ($access_value > 0 || $user->uid == $uid) {
     $timesheet_exists =  _check_if_timesheet_exists($ticket_nid, $date);
     if ($timesheet_exists !== 0 ) {
@@ -167,14 +176,14 @@ function add_timesheet_form($form, &$form_state) {
         '#type' => 'textfield',
         '#title' => t('Spent hours') ,
         '#default_value' => $existing_hours, 
-        '#description' => t('Choose the user that you want to be added to the team.'),
+        '#prefix' => '<div id="hour_input">',
+        '#suffix' => '</div>',
       );
       $form['body_exist'] = array(
         '#type' => 'textfield',
         '#title' => t('Comment') ,
         '#default_value' => $existing_comment, 
         '#attributes' => array('placeholder' => t('Your comment should go here!')),
-        '#description' => t('hidden field for submit function'),
         '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
       );
       $form['ticket_nid'] = array(
@@ -219,13 +228,13 @@ function add_timesheet_form($form, &$form_state) {
       $form['hours'] = array(
         '#type' => 'textfield',
         '#title' => t('Spent hours') ,
-        '#description' => t('Choose the user that you want to be added to the team.'),
+        '#prefix' => '<div id="hour_input">',
+        '#suffix' => '</div>',
       );
       $form['body'] = array(
         '#type' => 'textfield',
         '#title' => t('Comment') ,
         '#attributes' => array('placeholder' => t('Your comment should go here!') ),
-        '#description' => t('hidden field for submit function'),
         '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
       );
       $form['ticket_nid'] = array(
@@ -299,6 +308,8 @@ function add_timesheet_form_validate($form, &$form_state) {
   }  
   $form_state['values']['validated']  = $validated;    
 }
+// Regular form submit. 
+// Executes accordingly to the existence of the timesheet.
 function add_timesheet_form_submit($form, &$form_state) {
   $hours_spent = $form_state['values']['hours_exist'];
   $ticket_nid = $form_state['values']['ticket_nid']; 
@@ -315,6 +326,8 @@ function add_timesheet_form_submit($form, &$form_state) {
     $new_timesheet = _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $comment);
   }
 }
+// Ajax function on the submit action.
+// It allows validation and closes the popup window.  
 function ajax_form_add_timesheet_form_submit($form, &$form_state ) {
   ctools_include('ajax');
   ctools_include('modal');
@@ -371,6 +384,8 @@ function _create_new_timesheet($user_uid, $ticket_nid, $hours_spent, $date, $com
     node_save($node);
   }
 }
+// Goes to tables of the customly added fields of the timesheet
+// and check if there is a timesheet for the date and the ticket.
 function _check_if_timesheet_exists($ticket_nid, $date) {
   $query_get_timesheet_nids_by_date = "SELECT entity_id FROM {field_data_field_date_created} WHERE field_date_created_value = :date";
   $args_get_timesheet_nids_by_date = array(':date' => $date);
@@ -393,4 +408,3 @@ function _check_if_timesheet_exists($ticket_nid, $date) {
   }
   return 0;
 }
-

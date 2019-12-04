@@ -7,19 +7,7 @@
 (function($) {
   Drupal.behaviors.manage_dashboard = {
     attach: function(context, settings) {
-      // some theming code
-      $('.custom-class-node-title').find('a').attr('style', 'text-decoration: none; color: black;');
-      $('a:contains("New ticket")').css('color', 'white');
-      $('a:contains("Add a skill")').css('color', 'white');
-      $('a:contains("Dashboard")').css('color', 'white');
-      $('a:contains("Add a team member")').css('color', 'white');
-      $('form-item-end-date').css('color','red');
-      $('h6:contains("Projects")').attr('id', 'custom-h6-project-style');
-      $('h2:contains("Team")').attr('id', 'custom-h6-team-style');
-      $('caption').attr('class', 'custom_caption');
-      $('.add_to_team_custom.ctools-use-modal-processed').attr('id', 'add_to_team_custom');
-      $('#user-add-to-project-form').css('background-color', 'black');
-      $('#role-label').css('padding-top','10px');
+
       // initializes elements for future droppable areas
       var list_open = $('#list-open').find('.item-list');
       var list_development = $('#list-dev').find('.item-list');
