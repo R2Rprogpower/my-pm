@@ -100,17 +100,16 @@ function user_add_skill_form($form, &$form_state) {
       '#description' => t('Choose the level of the skill.')
     );
     $form['submit']['#submit'][] = 'user_add_skill_form_submit';
-
+    $form['#attributes'] = array('class' => 'add_skill_custom');
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('add a skill to the user'),
-      '#prefix' => '<div id="add_skill_custom">',
+      '#prefix' => '<div id="add_skill_custom_submit">',
       '#suffix' => '</div>',
       '#ajax' => array(
         'callback' => 'ajax_form_user_add_skill_form_submit',
         'event' => 'click',
         'wrapper' => 'ajax_form_message_wrapper',
-
       ), 
     );
   }
@@ -159,10 +158,6 @@ function ajax_form_user_add_skill_form_submit($form, &$form_state) {
   ctools_modal_add_js(); 
   $commands = array();
   $validated = $form_state['values']['validated'];  
-//  if (!$validated) {
-//    $a = '<div id="ajax_form_message_wrapper"></div>' ;
-//    return $a; 
-//  }
   $commands[] = ajax_command_invoke(NULL, "reload_paragraph");
   $commands[] = ctools_modal_command_dismiss();
   return array(
@@ -170,7 +165,266 @@ function ajax_form_user_add_skill_form_submit($form, &$form_state) {
     '#commands' => $commands,
   );
 }
+function _get_users_team_members($user) {
+  // select all users with the projects of the current user
+  $uid = $user->uid;
+  $user = user_load($uid);
+  $user_projects = $user->field_project[LANGUAGE_NONE];
+  foreach ($user_projects as $user_proj){
+    $available_users[] = _get_users_for_ticket_form($user_proj['nid']);
+  }
+ 
 
+  $good_arr = array ();
+  foreach ($available_users as $ind => $val) {
+    $good_arr = $good_arr + $val;
+  }
+
+  $available_users =  $good_arr;
+  return $available_users;
+}
+
+function edit_task_form($form, &$form_state) {
+  $nid = arg(1);
+   // creates  $ticket_types_array  for  $form['type']
+  $ticket_types_array = get_vocabulary_terms(get_vocabulary_id('Ticket_type'));
+  // creates  $ticket_statuses_array  for  $form['status']
+  $projects_array = _get_all_projects();
+  // creates $ticket_statuses_array  for  $form['status']
+  $ticket_statuses_array = get_vocabulary_terms(get_vocabulary_id('Ticket_status'));
+  // creates  $ticket_statuses_array  for  $form['status']
+  $days_amount_array = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+  // creates  $default_project  for  $form['status']
+  // creates $team_members_array for   $form['reporter']  and $form['responsable']
+  global $user;
+  $team_members_array = _get_users_team_members($user);
+  $format = 'Y-m-d';
+  $existent_ticket = node_load($nid);
+  $this_project = $existent_ticket->field_project[LANGUAGE_NONE][0]['nid'];
+  $this_title = $existent_ticket->title;
+  $this_type = $existent_ticket->field_type[LANGUAGE_NONE][0]['tid'];
+  $this_desc = $existent_ticket->field_description[LANGUAGE_NONE][0]['value'];
+  $this_status = $existent_ticket->field_status[LANGUAGE_NONE][0]['tid'];
+  $this_estim = $existent_ticket->field_estimate[LANGUAGE_NONE][0]['value'];
+  if($this_estim  > 0){
+    $this_estim = $this_estim - 1;
+  } 
+  else {
+    $this_estim = 0;
+  }
+  $this_start_date = $existent_ticket->field_start_date[LANGUAGE_NONE][0]['value'];
+  $this_end_date = $existent_ticket->field_end_date[LANGUAGE_NONE][0]['value']; 
+  $all_users = _get_all_users();
+  $this_responsible  =  $existent_ticket->field_responsible[LANGUAGE_NONE][0]['uid'];
+  $this_reporter  =  $existent_ticket->field_reporter[LANGUAGE_NONE][0]['uid'];
+  $current_user = user_load($user->uid);
+  $current_roles = $current_user->roles;
+  $if_user_is_admin = get_access_admin_value($current_roles);
+  $current_projects = $current_user->field_project[LANGUAGE_NONE];
+ 
+  $access_value = get_access_project_value($current_projects);
+  $available_projects = array();
+  if(!$if_user_is_admin){
+    foreach ($current_projects as $user_proj) {
+      foreach ($projects_array as $index => $project) {
+        $available_projects[$user_proj['nid']] =  $projects_array[$user_proj['nid']];
+      }
+    }
+    $available_projects = array_unique($available_projects);    
+    $available_users = $team_members_array;
+  }
+  else{
+    $available_users = $all_users;
+    $available_projects = $projects_array;
+  }
+    
+    
+  
+  $form['user'] = array(
+   '#type' => 'hidden',
+   '#title' => t('Date') ,
+   '#value' => $user,
+   '#description' => t('hidden field for submit function'),
+  );
+   $form['node'] = array(
+   '#type' => 'hidden',
+   '#title' => t('Date') ,
+   '#value' => $existent_ticket,
+   '#description' => t('hidden field for submit function'),
+  );
+  $form['project'] = array(
+    '#type' => 'select',
+    '#title' => t('project') ,
+    '#required' => TRUE,
+    '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
+    '#default_value' => $this_project,
+    '#options' => $available_projects,
+    '#description' => t('Choose the project of the new ticket.'),
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title') ,
+    '#required' => TRUE,
+    '#default_value' => $this_title,
+    '#description' => t('Choose the title of the new ticket.')
+  );
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#default_value' => $this_type,
+
+    //'#required' => TRUE,
+    '#options' => $ticket_types_array,
+    '#description' => t('Choose the type of the new ticket.'),
+  );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#default_value' => $this_desc, 
+    //'#required' => TRUE,
+    '#description' => t('Space for orders, details, clarifications, motivations.'),
+  );
+  $form['status'] = array(
+    '#type' => 'select',
+    '#title' => t('Status') ,
+    '#default_value' => $this_status,
+   // '#required' => TRUE,
+    '#options' => $ticket_statuses_array,
+    '#description' => t('Choose the status of the new which new ticket is related to.')
+  );
+  $form['estimate'] = array(
+    '#type' => 'select',
+    '#title' => t('Estimate') ,
+    '#default_value' => $this_estim,
+    //'#required' => TRUE,
+    '#options' => $days_amount_array,
+    '#description' => t('Choose the amount of days that are needed to complete the task.')
+  );
+  $form['start_date'] = array(
+    '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+    '#title' => t('Start date & time') ,
+    '#default_value' => $this_start_date,
+    '#date_format' => $format,
+    '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+    '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+    '#date_year_range' => '0:+2', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
+    '#description' => t('Choose the start date for the ticket.')
+  );
+  $form['end_date'] = array(
+    '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+    '#title' => t('End date & time') ,
+    '#default_value' => $this_end_date,
+    '#date_format' => $format,
+    '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+    '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+    '#date_year_range' => '-3:+3', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
+    '#description' => t('Choose the start date for the ticket.'),
+  );
+  $form['reporter'] = array(
+    '#type' => 'select',
+    '#title' => t('Reporter') ,
+    '#default_value' => $this_reporter,
+    '#options' => $available_users,
+    '#description' => t('Choose the team member who reported the issue.')
+  );
+  $form['responsible'] = array(
+    '#type' => 'select',
+    '#title' => t('Responsible') ,
+    '#default_value' => $this_responsible,
+    '#options' => $available_users,
+    '#description' => t('Choose the team member who is gonna be responsable for the complition of the task.')
+  );
+  $form['submit']['#submit'][] = 'add_new_task_form_submit';
+  $form['#attributes'] = array('class' => 'add_new_task_form_submit_custom');
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('add task to the project'),
+    '#prefix' => '<div id="add_new_task_custom">',
+    '#suffix' => '</div>',
+    '#ajax' => array(
+      'callback' => 'ajax_form_edit_task_form_submit',
+      'event' => 'click',
+      'wrapper' => 'ajax_form_message_wrapper',
+    ), 
+  );
+  return $form;
+ }
+function edit_task_form_validate($form, &$form_state) {
+  $validated = 1;
+  if ( empty($form_state['values']['title'])) {
+    form_set_error('title', t('You cannot leave the field empty :)'));
+    $validated = 0;
+  }
+  if ( empty($form_state['values']['description'])) {
+    form_set_error('description', t('You cannot leave the description field empty :)'));
+    $validated = 0;
+  } 
+  $form_state['values']['validated'] = $validated;
+}
+function edit_task_form_submit($form, &$form_state) {
+  $user = $form_state['values']['user'];
+  $nid = $form_state['values']['nid'];
+  $ticket_title = $form_state['values']['title'];
+  $ticket_description = array(
+    'value' => $form_state['values']['description'],
+    'format' => '',
+    'safe_value' => $form_state['values']['description'],
+  );
+  $ticket_reporter = $form_state['values']['reporter'];
+  $ticket_responsible = $form_state['values']['responsible'];
+  $ticket_status_term_reference = $form_state['values']['status'];
+  $ticket_type_term_reference = $form_state['values']['type'];
+  $ticket_estimate = $form_state['values']['estimate'];
+  $ticket_project_nid = $form_state['values']['project'];
+  $ticket_start_date = array(
+    'value' => $form_state['values']['start_date'],
+    'timezone' => 'Europe/Helsinki',
+    'timezone_db' => 'Europe/Helsinki',
+    'date_type' => 'datetime',
+  );
+  $ticket_end_date = array(
+    'value' => $form_state['values']['end_date'],
+    'timezone' => 'Europe/Helsinki',
+    'timezone_db' => 'Europe/Helsinki',
+    'date_type' => 'datetime',
+  );
+  $node = $form_state['values']['node'];
+    
+  $field_project_value = array(
+    'nid' => $ticket_project_nid
+  );
+  $node->title = $ticket_title;
+  $node->field_project[$node->language][0] = $field_project_value;
+  $node->field_type[$node->language][0]['tid'] = $ticket_type_term_reference;
+  $node->field_status[$node->language][0]['tid'] = $ticket_status_term_reference;
+  $node->field_estimate[$node->language][0] = $ticket_estimate;
+  $node->field_start_date[$node->language][0] = $ticket_start_date;
+  $node->field_end_date[$node->language][0] = $ticket_end_date;
+  $node->field_description[$node->language][0] = $ticket_description;
+  $node->field_reporter[$node->language][0]['uid'] = $ticket_reporter;
+  $node->field_responsible[$node->language][0]['uid'] = $ticket_responsible;
+  $node = node_submit($node); // Prepare node for saving
+  node_save($node);
+  $form_state['values']['redirect'] = 'node/' . $node->nid;
+}
+function ajax_form_edit_task_form_submit($form, &$form_state) {;
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js(); 
+  $view_to_reload = $form_state['values']['status'];
+  $commands = array();
+  $validated = $form_state['values']['validated']; 
+  if (!$validated) {
+    $a = '<div id="ajax_form_message_wrapper"></div>' ;
+    return $a; 
+  }
+  $commands[] = ctools_modal_command_dismiss();
+  $commands[] = ctools_ajax_command_redirect($form_state['values']['redirect']);
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
 function add_new_task_form($form, &$form_state) {
    // creating  $ticket_types_array  for  $form['type']
   $ticket_types_array = get_vocabulary_terms(get_vocabulary_id('Ticket_type'));
@@ -192,41 +446,32 @@ function add_new_task_form($form, &$form_state) {
   $current_projects = $current_user->field_project[LANGUAGE_NONE];
   $users = _get_all_users();
   $access_value = get_access_project_value($current_projects);
-  drupal_set_message('<pre>'. print_r($current_projects, true) .'</pre>');
-  drupal_set_message('<pre>'. print_r($projects_array, true) .'</pre>');  
-  foreach ($projects_array as $proj) {
+  $available_projects = array();
+  if(!$if_user_is_admin){
     foreach ($current_projects as $user_proj) {
-      $validated = 0;
-      if($proj == $chosen_project) {
-         $validated = 1;
-         break;
+      foreach ($projects_array as $index => $project) {
+        $available_projects[$user_proj['nid']] =  $projects_array[$user_proj['nid']];
       }
+    }
+    $available_projects = array_unique($available_projects);
   }
- 
-    
-  $form['user_projects'] = array(
-   '#type' => 'hidden',
-   '#title' => t('Date') ,
-   '#value' => $current_projects,
-   '#description' => t('hidden field for submit function'),
-  );
-  
-  
+  else{
+    $available_projects = $projects_array;
+  }
   $form['user'] = array(
    '#type' => 'hidden',
    '#title' => t('Date') ,
    '#value' => $user,
    '#description' => t('hidden field for submit function'),
   );
-   $form['project'] = array(
-     '#type' => 'select',
-     '#title' => t('project') ,
-     //'#required' => TRUE,
-     '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
-     '#options' => $projects_array,
-     '#description' => t('Choose the project of the new ticket.'),
-
- );
+  $form['project'] = array(
+    '#type' => 'select',
+    '#title' => t('project') ,
+    //'#required' => TRUE,
+    '#prefix' => '<div id="ajax_form_message_wrapper"></div>',
+    '#options' => $available_projects,
+    '#description' => t('Choose the project of the new ticket.'),
+  );
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title') ,
@@ -240,41 +485,38 @@ function add_new_task_form($form, &$form_state) {
     //'#required' => TRUE,
     '#options' => $ticket_types_array,
     '#description' => t('Choose the type of the new ticket.'),
-
-
- );
- $form['description'] = array(
+  );
+  $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description') ,
     //'#required' => TRUE,
     '#description' => t('Space for orders, details, clarifications, motivations.'),
-
- );
- $form['status'] = array(
+  );
+  $form['status'] = array(
     '#type' => 'select',
     '#title' => t('Status') ,
    // '#required' => TRUE,
     '#options' => $ticket_statuses_array,
     '#description' => t('Choose the status of the new which new ticket is related to.')
- );
- $form['estimate'] = array(
+  );
+  $form['estimate'] = array(
     '#type' => 'select',
     '#title' => t('Estimate') ,
-  //  '#required' => TRUE,
+    //'#required' => TRUE,
     '#options' => $days_amount_array,
     '#description' => t('Choose the amount of days that are needed to complete the task.')
- );
- $form['start_date'] = array(
-   '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
-   '#title' => t('Start date & time') ,
-   '#default_value' => $date,
-   '#date_format' => $format,
-   '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
-   '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
-   '#date_year_range' => '0:+2', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
-   '#description' => t('Choose the start date for the ticket.')
- );
- $form['end_date'] = array(
+  );
+  $form['start_date'] = array(
+    '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+    '#title' => t('Start date & time') ,
+    '#default_value' => $date,
+    '#date_format' => $format,
+    '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+    '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+    '#date_year_range' => '0:+2', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
+    '#description' => t('Choose the start date for the ticket.')
+  );
+  $form['end_date'] = array(
    '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
    '#title' => t('End date & time') ,
    '#default_value' => $date,
@@ -418,6 +660,7 @@ function dashboard_add_new_task_form($form, &$form_state) {
   $date = time();
   $format = 'Y-m-d';
   global $user;
+  $users = _get_all_users();
   $current_user = user_load($user->uid);
   $current_roles = $current_user->roles;
   $if_user_is_admin = get_access_admin_value($current_roles);
@@ -693,7 +936,7 @@ function ajax_form_dashboard_add_new_task_form_submit($form, &$form_state) {
         $display_id = 'dashboard_test';
         break;    
 }
-   $commands[] = ajax_command_invoke(NULL, "reload_project_tickets", array($display_id));
+  $commands[] = ajax_command_invoke(NULL, "reload_project_tickets", array($display_id));
   $commands[] = ctools_modal_command_dismiss();
   return array(
     '#type' => 'ajax',
@@ -705,13 +948,21 @@ function delete_task_form() {
   $nid = arg(1);
   $this_task_title = _get_node_title($nid);
   $message = t('If you are sure that ticket') . ' ' . t($this_task_title) . ' ' . t('has to be deleted, press the button');
+  global $user;
+  // checks if user is the admin
+  //if ()
   $form['nid'] = array(
    '#type' => 'hidden',
    '#title' => t('Date') ,
    '#value' => $nid,
    '#description' => t('hidden field for submit function'),
   );
-   $form['textfield'] = array(
+  $form['user'] = array(
+   '#type' => 'hidden',
+   '#value' => $user,
+   '#description' => t('hidden field for submit function'),
+  );
+  $form['textfield'] = array(
     '#type' => 'textfield',
     '#size' => 90,
     '#value' => $message,
@@ -719,12 +970,25 @@ function delete_task_form() {
       'readonly' => 'readonly'
     ) ,
   );
-  $form['submit_button'] = array(
-    '#type' => 'submit',
-    '#title' =>  check_plain($message),
-    '#value' => t('Delete the task') ,
+    
+    
+  $form['submit']['#submit'][] = 'delete_task_form_submit';
+  $form['#attributes'] = array('class' => 'delete_task_custom');
+
+  $form['submit'] = array(
+   '#type' => 'submit',
+   '#title' =>  check_plain($message),
+   '#value' => t('Delete the task') ,
+   '#prefix' => '<div id="delete_task_form_submit_custom">',
+   '#suffix' => '</div>',
+   '#ajax' => array(
+     'callback' => 'ajax_form_delete_task_form_submit',
+     'event' => 'click',
+     'wrapper' => 'ajax_form_message_wrapper',
+    ), 
   );
-  $form['#submit'][] = 'delete_task_form_submit';
+       
+       
   return $form;
 }
 function delete_task_form_validate($form, &$form_state) {
@@ -732,8 +996,23 @@ function delete_task_form_validate($form, &$form_state) {
 function delete_task_form_submit($form, &$form_state) {
   $nid = $form_state['values']['nid'];
   node_delete($nid);
-  $form_state['redirect'] = 'user';
+  $user =  $form_state['values']['user'];
+  $uid = $user->uid;
+  $form_state['values']['redirect'] = '/user/' . $uid;
 }
+function ajax_form_delete_task_form_submit($form, &$form_state) {
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js(); 
+  $commands = array();
+  $commands[] = ctools_ajax_command_redirect($form_state['values']['redirect']);
+  $commands[] = ctools_modal_command_dismiss();
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
 // page arument of the delete team member form
 function user_delete_from_project_form($form, &$form_state) {
   $nid = arg(1);

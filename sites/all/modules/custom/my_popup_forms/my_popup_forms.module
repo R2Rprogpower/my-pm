@@ -21,7 +21,7 @@ function my_popup_forms_menu()  {
     'file' => 'includes/pages.my_popup_forms.inc',
     'modal' => TRUE, // This line is where the magic happens.
   );
-   $items['user/%user/ajax/%ctools_js/add_skill'] = array(
+  $items['user/%user/ajax/%ctools_js/add_skill'] = array(
     'title' => 'modal contents',
     'page callback' => 'ajax_modal_my_popup_forms_add_skill_page_callback',
     'page arguments' => array(3),
@@ -37,7 +37,7 @@ function my_popup_forms_menu()  {
     'file' => 'includes/pages.my_popup_forms.inc',
     'modal' => TRUE, // This line is where the magic happens.
   );
-   $items['ajax/%ctools_js/add/ticket'] = array(
+  $items['ajax/%ctools_js/add/ticket'] = array(
     'title' => 'modal contents',
     'page callback' => 'ajax_modal_my_popup_forms_add_new_ticket_page_callback',
     'page arguments' => array(3),
@@ -45,7 +45,22 @@ function my_popup_forms_menu()  {
     'file' => 'includes/pages.my_popup_forms.inc',
     'modal' => TRUE, // This line is where the magic happens.
   );
-  
+  $items['node/%node/ajax/%ctools_js/edit/ticket'] = array(
+    'title' => 'modal contents',
+    'page callback' => 'ajax_modal_my_popup_forms_edit_ticket_page_callback',
+    'page arguments' => array(3),
+    'access callback' => TRUE, 
+    'file' => 'includes/pages.my_popup_forms.inc',
+    'modal' => TRUE, // This line is where the magic happens.
+  );
+  $items['node/%node/ajax/%ctools_js/delete/ticket'] = array(
+    'title' => 'modal contents',
+    'page callback' => 'ajax_modal_my_popup_forms_delete_ticket_page_callback',
+    'page arguments' => array(3),
+    'access callback' => TRUE, 
+    'file' => 'includes/pages.my_popup_forms.inc',
+    'modal' => TRUE, // This line is where the magic happens.
+  );
   return $items;
 }
   

@@ -7,14 +7,13 @@
 (function($) {
   Drupal.behaviors.manage_dashboard = {
     attach: function(context, settings) {
-
       // initializes elements for future droppable areas
       var list_open = $('#list-open').find('.item-list');
       var list_development = $('#list-dev').find('.item-list');
       var list_ready = $('#list-red').find('.item-list');
       var list_test = $('#list-test').find('.item-list');
       var list_closed = $('#list-closed').find('.item-list');
-      // decalres draggable area of the 1 tickets <li> block
+       // decalres draggable area of the 1 tickets <li> block
       // When the lmb is held over the block   
       var drag_area = $('li.custom-row-class ').mousedown(function() {
         drag_area.draggable({

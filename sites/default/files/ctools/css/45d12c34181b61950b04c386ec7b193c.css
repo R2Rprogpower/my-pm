@@ -43,7 +43,12 @@
 
 .panels-flexible-column-26-main {
   float: left;
-  width: 99.0000%;
+  width: 49.0047%;
+}
+
+.panels-flexible-column-26-1 {
+  float: left;
+  width: 49.9953%;
 }
 
 .panels-flexible-26-inside {
@@ -56,15 +61,19 @@
 
 .panels-flexible-region-26-center {
   float: left;
-  width: 49.5000%;
-}
-
-.panels-flexible-region-26-right_ {
-  float: left;
-  width: 49.5000%;
+  width: 99.0000%;
 }
 
 .panels-flexible-row-26-main-row-inside {
+  padding-right: 0px;
+}
+
+.panels-flexible-region-26-right3 {
+  float: left;
+  width: 99.0000%;
+}
+
+.panels-flexible-row-26-2-inside {
   padding-right: 0px;
 }
 
