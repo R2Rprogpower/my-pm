@@ -65,7 +65,7 @@
       $('.ajax-detach-user').click(function(e) {
         e.preventDefault();
         var myUrl = $(this).attr('href');
-        if ( jQuery.post(myUrl, 0) ) {
+        if ( jQuery.once().post(myUrl, 0) ) {
           $(this).parent().parent().hide();
         }
       });

@@ -19,7 +19,7 @@
       $('h2:contains("Team")').attr('id', 'custom-h6-team-style');
       $('caption').attr('class', 'custom_caption');
       $('.add_to_team_custom.ctools-use-modal-processed').attr('id', 'add_to_team_custom');
-      $('#user-add-to-project-form').css('background-color', 'black');
+      //$('#user-add-to-project-form').css('background-color', 'black');
       $('#role-label').css('padding-top','10px');
       
       $('li.prev').css('margin-top', '36.5px');
@@ -71,6 +71,7 @@
         addTicketEndDateModal.parent().append(ticketEndDatedescription);
         ticketEndDatedescription.css('margin-top', '41px');
         
+    
         
          var addTimesheetModal = $('.add_timesheet_custom.ctools-use-modal-processed').parent().parent();
         addTimesheetModal.css('max-width', '400px');
@@ -80,9 +81,12 @@
         var addSkillModal = $('.add_skill_custom').parent().parent();
         addSkillModal.css('max-width', '400px');
         addSkillModal.css('margin-left', '35%');
+        
+        
         var addTeamMemberModal = $('.add_to_team_custom').parent().parent();
         addTeamMemberModal.css('max-width', '400px');
         addTeamMemberModal.css('margin-left', '35%');
+        
         var DeleteTicketModal = $('.delete_task_custom').parent().parent();
         DeleteTicketModal.css('max-width', '600px');
         DeleteTicketModal.css('margin-left', '35%');

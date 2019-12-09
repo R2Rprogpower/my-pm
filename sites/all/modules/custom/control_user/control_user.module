@@ -1136,9 +1136,13 @@ function user_add_to_project_form($node, &$form_state) {
         $form['link2'] = array(
           '#markup' => $link2,
         );
+              $form['#attributes'] = array('class' => 'add_to_team_custom');
+
       };
     }
     else {
+            $form['#attributes'] = array('class' => 'add_to_team_custom');
+
       $project_title = _get_node_title($nid);
       $link3 = l(t('Go back to the ' . $project_title . '  project page') , 'node/' . arg(1));
       $message3 = t('Only Project Managers and Admins can add users to projects');
