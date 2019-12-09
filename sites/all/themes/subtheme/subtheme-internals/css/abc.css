@@ -30,8 +30,12 @@ ol {
 }*/
 
 .form-item.form-item-skill-name.form-type-select.form-group {
-  max-width: 360px;
-  
+    max-width: 360px;
+
+}
+.form-item.form-item-skill-level.form-type-select.form-group {
+    max-width: 360px;
+
 }
 
 
@@ -101,8 +105,7 @@ ol {
 .custom-class-node-title{
     margin-left: 50%;
     font-size: 36px;
-    margin-top:50px;
-    margin-bottom:50px;
+    margin-bottom:80px;
 
 }
 .custom-class-node-title a{

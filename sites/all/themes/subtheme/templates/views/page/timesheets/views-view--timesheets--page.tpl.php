@@ -1,5 +1,5 @@
 <?php
- 
+
 /**
  * @file
  * Main view template.
@@ -26,12 +26,8 @@
  *
  * @ingroup views_templates
  */
+ 
 ?>
-<style>
-.ui-droppable{
-    min-height: 300px;
-}
-</style>
 <div class="<?php print $classes; ?>">
   <?php print render($title_prefix); ?>
   <?php if ($title): ?>
@@ -40,7 +36,7 @@
   <?php print render($title_suffix); ?>
   <?php if ($header): ?>
     <div class="view-header">
-      <?php print $header; ?>
+     <?php print $header; ?>
     </div>
   <?php endif; ?>
 
@@ -56,21 +52,25 @@
     </div>
   <?php endif; ?>
 
-    
-    
   <?php if ($rows): ?>
     <div class="view-content">
-      <?php print $rows; ?>
+      <?php print $rows ; ?>
     </div>
-    
-  
+  <?php elseif ($empty): ?>
+    <div class="view-empty">
+      <?php print $empty; ?>
+    </div>
   <?php endif; ?>
 
   <?php if ($pager): ?>
     <?php print $pager; ?>
   <?php endif; ?>
 
-  
+  <?php if ($attachment_after): ?>
+    <div class="attachment attachment-after">
+      <?php print $attachment_after; ?>
+    </div>
+  <?php endif; ?>
 
   <?php if ($more): ?>
     <?php print $more; ?>
@@ -88,18 +88,4 @@
     </div>
   <?php endif; ?>
 
-</div>
- 
-  
- 
-
-                
-      
- 
-             
- 
-    <?php /* class view */ ?>
-
-
-    
-    
+</div><?php /* class view */ ?>

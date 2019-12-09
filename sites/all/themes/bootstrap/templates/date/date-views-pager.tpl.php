@@ -32,5 +32,5 @@
 <?php endif; ?>
 <nav id="abra"<?php print $attributes;?>>
   <?php print render($items); ?>
-  <h3 ><?php print $nav_title ?></h3>
+  <!--<h3 ><?php print $nav_title ?></h3>-->
 </nav>

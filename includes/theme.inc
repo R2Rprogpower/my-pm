@@ -2618,6 +2618,12 @@ function template_preprocess_html(&$variables) {
   if ($suggestions = theme_get_suggestions(arg(), 'html')) {
     $variables['theme_hook_suggestions'] = $suggestions;
   }
+    $variables['my_head_titles'] = array();
+    $variables['my_head_titles']  = array(
+      'dashboard' => 'Dashboard',
+	  'timesheets' => 'Timesheets',
+	  //'dashboard' => 'Dashboard',
+	);
 }
 
 /**

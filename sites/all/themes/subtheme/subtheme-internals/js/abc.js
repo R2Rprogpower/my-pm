@@ -22,7 +22,7 @@
       //$('#user-add-to-project-form').css('background-color', 'black');
       $('#role-label').css('padding-top','10px');
       
-      $('li.prev').css('margin-top', '36.5px');
+      $('li.prev').css('margin-top', '20.5px');
       $('li.prev').css('position', 'absolute');
       $('li.prev').find('span').css('margin-top', '3px');
       $('li.prev').find('span').css('position', 'absolute');
@@ -34,7 +34,7 @@
       $('.prev').find('a').css('background-color', '#eee');
 
 
-      $('li.next').css('margin-top', '36.5px');
+      $('li.next').css('margin-top', '20.5px');
       $('li.next').find('span').css('margin-top', '3px');
        $('li.next').find('span').css('position', 'absolute');
       $('li.next').css('position', 'absolute');
@@ -42,14 +42,11 @@
       $('li.next').find('a').css('max-height', '0.00000000001px');
       $('li.next').find('a').css('max-width', '0.00000000001px');
       $('li.next').find('a').css('z-index', '10');
-      $('li.next').css('margin-left', '-40px');  
+      $('li.next').css('margin-left', '-35px');  
      // $('li.next').css('font-size', '6px'); 
       $('.next').find('a').css('background-color', '#eee');
-       $(".ctools-modal-dialog modal-dialog").ready(function () { 
-        var addTimesheetModal = $('.add_timesheet_custom.ctools-use-modal-processed').parent().parent();
-        addTimesheetModal.css('max-width', '400px');
-        //addTimesheetModal.css('margin-right', '25%');
-        addTimesheetModal.css('margin-left', '35%');
+      // $(".ctools-modal-dialog modal-dialog").ready(function () { 
+       
         var addTicketStartDateModal = $('.dashboard_add_new_task_form_submit_custom.ctools-use-modal-processed').find('.form-item-start-date');
         addTicketStartDateModal;
         var ticketStartDateLabel = addTicketStartDateModal.find('label');
@@ -83,7 +80,7 @@
         addSkillModal.css('margin-left', '35%');
         
         
-        var addTeamMemberModal = $('.add_to_team_custom').parent().parent();
+        var addTeamMemberModal = $('form.add_skill_custom.ctools-use-modal-processed').parent().parent();
         addTeamMemberModal.css('max-width', '400px');
         addTeamMemberModal.css('margin-left', '35%');
         
@@ -113,10 +110,8 @@
         addTicketEndDateModal.parent().append(ticketEndDatedescription);
         ticketEndDatedescription.css('margin-top', '41px');
         
-      });
-      $(".ctools-modal-dialog modal-dialog").ready(function () { 
-       
-      });
+      //});
+     
     }
   };
 }(jQuery, Drupal));

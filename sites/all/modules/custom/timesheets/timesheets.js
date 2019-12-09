@@ -26,7 +26,6 @@
           var data = {"date" : date} ;
           var total_sums = {};
           var url1 = path + '/ajax';
-          console.log(url1);
           $.ajax({
             type: 'POST',
             url: url1 ,
@@ -34,7 +33,6 @@
             dataType: 'html',
             success: function (timesheetsInfoJson) {
               var timesheetsInfo = JSON.parse(timesheetsInfoJson);
-              console.log(timesheetsInfo);
               // Creates the selectors of the timesheets info data 
               // and fills  elements with the values from the same data.
               $.each(timesheetsInfo, function(index, data){ 
