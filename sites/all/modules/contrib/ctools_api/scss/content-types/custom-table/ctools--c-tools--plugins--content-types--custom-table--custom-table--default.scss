@@ -1,5 +1,0 @@
-@each $side in left, center, right {
-  .align-#{$side} {
-    text-align: $side;
-  }
-}

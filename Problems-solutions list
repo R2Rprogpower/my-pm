@@ -1,0 +1,78 @@
+Understandability and extendability of the code for other developers 
+1. Spagetti code
+2. Underusage of the drupal inner functions
+
+front-end
+1. No way of seeing the execution of JS code step by step -- debugger by chrome dev tools
+2. No way of checking if the code is secure enough --
+3. No readablity of the (drupal) JS code -- Parsed code into functions, applied drupal js methods, made readable and shorter,
+4. No control over the amount of ajax calls sent(2 extra ajax call occur when trying to send only one)  --
+5.
+
+back-end
+1. No way of seeing the execution of PHP code step by step -- Xdebug for netbaens
+2. No way of checking if the code is secure enough --
+3. No structure to theme's .tpl files -- Brought to standards 
+4. No structure to modules folder -- Brought to standards 
+5. No deletion of  modules unneeded by the main features -- Deleted->back uped->tested->deleted
+6. No control of logging
+7. No hook form alter for forms, only self-written forms
+8.
+
+Optimization and speed of execution
+1. Long time of the page load --  
+2. Page runs slowly for the first time -- special cron job
+3. Ajax requests execute very slowly up to 10 secocnd -- JS module
+4. No way of tracking of the execution of different functions -- https://trello.com/c/WI4vYZhw/263-timesheets-page-learn-what-time-is-requiered-for-1-forming-page-2-downloading-page-3-executing-js-4-executing-ajax 
+
+front-end
+1. No picking of the best cdn provider and compression of libraries -- JSUpdate 
+2. No browser cache leverage -- htaccess update
+3. No gzip compression -- https://www.drupal.org/project/boost
+4. No use of lazy loading for site assets.
+5. No asynchronous Downloading of 3rd party scripts
+6. No Use of efficient CSS selectors.
+7. No removal of unused css
+8. No image optimization 
+9. Make sure all cache tables are clearing properly especially cache_form
+10.
+
+back-end
+1. No aggregation of js and css files  -- set in development settings
+2. No setup or control of cron jobs at all -- set cron jobs which...
+3. No caching of pages and blocks -- set in development settings
+4. No caching optimizations 
+5. No db maintance 
+6. No deletion of  modules unneeded by the main features -- Deleted->back uped->tested->deleted
+7. a lot of indention in .tpl files
+8. No manual reduce of the size of css files.
+9.
+Time needed to download and display time sheets 3.419 seconds
+
+User Page
+  first load 
+    1. forming page = 7s < x < 20s
+    2. downloading page = 1.5s < x < 3.5s
+    3. Executing js  = 0.004 < x < 0.008s
+   // 4. making ajax call  = 0 < x < 0
+
+  not first load
+    1. forming page =  1s < x < 4s
+    2. downloading page = 1.5s < x < 3.5s
+    3. Executing js  = 0.004 < x < 0.008s
+   // 4. making ajax call  = 0 < x < 0
+   
+Timesheets Page
+  first load 
+    1. forming page = 7s < x < 20s
+    2. downloading page = 1.5s < x < 3.5s
+    3. Executing js  = 0.009s < x < 0.020s
+    4. making ajax call  = 2.664s < x < 3.666s
+
+  not first load
+    1. forming page =  1s < x < 4s
+    2. downloading page = 1.5s < x < 3.5s
+    3. Executing js  = 0.009s < x < 0.020s
+    4. making ajax call  = 2.664s < x < 3.666s
+	
+ 
