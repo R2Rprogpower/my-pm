@@ -1,35 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
-        <file>
-            <url>sites/all/themes/subtheme/templates/calendar-week-overlap--calendar.tpl.php</url>
-            <bookmark id="2">
-                <name/>
-                <line>0</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>sites/all/modules/custom/my/includes/pages.my.inc</url>
-            <bookmark id="1">
-                <name/>
-                <line>21</line>
-                <key/>
-            </bookmark>
-        </file>
-    </editor-bookmarks>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/modules/custom/my_popup_forms/my_popup_forms.module</file>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/modules/custom/control_user/control_user.js</file>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/themes/subtheme/subtheme-internals/js/abc.js</file>
             <file>file:/C:/xampp/htdocs/www/drupal-7/index.php</file>
             <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/modules/custom/timesheets/timesheets.module</file>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/modules/custom/my_popup_forms/includes/pages.my_popup_forms.inc</file>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/themes/subtheme/templates/calendar-week-overlap--calendar.tpl.php</file>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/modules/custom/control_user/control_user.module</file>
+            <file>file:/C:/xampp/htdocs/www/drupal-7/composer.json</file>
+            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/modules/custom/timesheets/timesheets.js</file>
             <file>file:/C:/xampp/htdocs/www/drupal-7/includes/bootstrap.inc</file>
-            <file>file:/C:/xampp/htdocs/www/drupal-7/sites/all/themes/subtheme/subtheme-internals/css/abc.css</file>
         </group>
     </open-files>
 </project-private>

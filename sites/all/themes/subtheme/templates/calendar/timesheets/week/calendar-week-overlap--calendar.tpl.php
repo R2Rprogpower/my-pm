@@ -120,6 +120,6 @@ foreach ($day_names as $key => $value) {
 </div>
 <script> 
   (function ($) {
-           //Drupal.attachBehaviors(document, Drupal.settings);
+     Drupal.attachBehaviors(document, Drupal.settings);
   }(jQuery));
 </script>

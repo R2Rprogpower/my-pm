@@ -9,6 +9,7 @@
   Drupal.behaviors.style = {
     attach: function (context, settings) {
       // some theming code
+      //console.log('scrr scrr');
       $('.custom-class-node-title').find('a').attr('style', 'text-decoration: none; color: black;');
       $('a:contains("New ticket")').css('color', 'white');
       $('a:contains("Add a skill")').css('color', 'white');
@@ -19,7 +20,6 @@
       $('h2:contains("Team")').attr('id', 'custom-h6-team-style');
       $('caption').attr('class', 'custom_caption');
       $('.add_to_team_custom.ctools-use-modal-processed').attr('id', 'add_to_team_custom');
-      //$('#user-add-to-project-form').css('background-color', 'black');
       $('#role-label').css('padding-top','10px');
       
       $('li.prev').css('margin-top', '20.5px');
