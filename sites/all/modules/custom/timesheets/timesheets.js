@@ -17,7 +17,7 @@
      
       function getDateForWeek() {
         if(checkPageTimesheets()) {
-          console.log('timesheets_page');
+          //console.log('timesheets_page');
           var dateTh = $('th.days.mon');
           var monDate = dateTh[0].id;
           var dateArr = monDate.split('/');
@@ -34,27 +34,30 @@
         }
         return 0;
       };
+      $.fn.get_timesheet_info = function () {
+        //var timesheetsInfo = JSON.parse(timesheetsInfoJson);
+
+        console.log(1);
+      }
       
  
-     
+    // get_timesheet_info();
        $( document ).ready(function() {
         
           var oldVal;
           var total_sums = {};
-                
-          var url_get_timesheets_info = window.location.pathname + '/ajax';
-          console.log(url_get_timesheets_info);
-          $('#ajax_target').load(url_get_timesheets_info);
           var data  = getDateForWeek();
-            
-         
-       
+          var url_get_timesheets_info = window.location.pathname + '/ajax';
+          
+  //      $('#ajax_target').load(url_get_timesheets_info, data);
+          
            
-           
-           
-//          var settings = {url : url_get_timesheets_info, data: data};
-//          var ajax = new Drupal.ajax(false, false, settings);
-//          ajax.eventResponse(ajax, {});
+          var settings = {url: url_get_timesheets_info, data: data,  success: function (timesheetsInfoJson) { console.log(2);  } };
+          var ajax = new Drupal.ajax(false, false, settings);
+          
+          var a = ajax.eventResponse(ajax, {});
+          console.log(ajax);
+
           
 //          $.ajax({
 //            type: 'POST',

@@ -23,7 +23,7 @@ function timesheets_menu() {
       'access arguments' => array(
         'access content',
       ) , 
-      'delivery callback' => 'ajax_callback',  // Magic goes here.
+      'delivery callback' => 'timesheets_ajax_callback',  // Magic goes here.
      
     );
     $items['user/week/timesheets/veiw/ajax/%/%user'] = array( //this creates a URL that will call this form at "examples/form-example"
@@ -132,8 +132,20 @@ function ajax_timesheets_page_get_timesheets_callback($ajax = 'ajax') {
     $timesheets_info = array_merge($timesheets_info, $timesheets_info_prev);
   }
   $timesheets_info_json = drupal_json_encode($timesheets_info);
-  drupal_json_output($timesheets_info);
+  return $timesheets_info_json;
+  
+   
 }
+
+function timesheets_ajax_callback($page_callback_result) {
+   print   $page_callback_result;
+//  $content = is_string($page_callback_result) ? $page_callback_result :   drupal_render($page_callback_result);
+//  $html = '' . drupal_get_css() . drupal_get_js() . '' . $page_callback_result . '';
+//  print $html;
+//  drupal_page_footer(); 
+}
+
+
 // Handles call for popup window when "+" is clicked
 function ajax_modal_timesheets_forms_page_callback($js = NULL) {
   if ($js) {
